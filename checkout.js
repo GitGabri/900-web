@@ -180,8 +180,11 @@ function handleFormSubmission(event) {
         orderId: generateOrderId()
     };
     
-    // Save order data
+    // Save order data locally
     localStorage.setItem('currentOrder', JSON.stringify(orderData));
+    
+    // Send order via email (using mailto link as a simple solution)
+    sendOrderViaEmail(orderData);
     
     // Show success message
     showNotification('Order submitted successfully!', 'success');
@@ -189,11 +192,58 @@ function handleFormSubmission(event) {
     // Clear cart
     localStorage.removeItem('cart');
     
-    // Redirect to confirmation page (you can create this later)
+    // Redirect to confirmation page
     setTimeout(() => {
-        alert('Thank you for your order! We will contact you soon with delivery details.');
-        window.location.href = 'index.html';
+        window.location.href = 'confirmation.html';
     }, 2000);
+}
+
+function sendOrderViaEmail(orderData) {
+    // Calculate totals
+    const subtotal = orderData.items.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
+    const tax = subtotal * 0.08;
+    const total = subtotal + tax;
+    
+    // Create email content
+    const emailSubject = `New Order: ${orderData.orderId}`;
+    const emailBody = `
+New Order Received
+
+Order ID: ${orderData.orderId}
+Date: ${new Date(orderData.orderDate).toLocaleDateString()}
+
+CUSTOMER INFORMATION:
+Name: ${orderData.customer.firstName} ${orderData.customer.lastName}
+Email: ${orderData.customer.email}
+Phone: ${orderData.customer.phone}
+Organization: ${orderData.customer.organization || 'N/A'}
+
+SHIPPING ADDRESS:
+${orderData.address.line1}
+${orderData.address.line2 ? orderData.address.line2 + '\n' : ''}
+${orderData.address.city}, ${orderData.address.state} ${orderData.address.zipCode}
+${orderData.address.country}
+
+ORDER ITEMS:
+${orderData.items.map(item => `- ${item.name} by ${item.composer} (${item.quantity}x) - $${(parseFloat(item.price) * item.quantity).toFixed(2)}`).join('\n')}
+
+ORDER SUMMARY:
+Subtotal: $${subtotal.toFixed(2)}
+Tax: $${tax.toFixed(2)}
+Total: $${total.toFixed(2)}
+
+NOTES FOR SELLER:
+${orderData.notes || 'No additional notes'}
+
+---
+This order was submitted through the 900 Music website.
+    `.trim();
+    
+    // Create mailto link
+    const mailtoLink = `mailto:hello@900music.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    
+    // Open email client
+    window.open(mailtoLink);
 }
 
 function generateOrderId() {
