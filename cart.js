@@ -193,10 +193,6 @@ function updateCartCount() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const cartCountElement = document.getElementById('cartCount');
     
-    console.log('updateCartCount called');
-    console.log('Cart from localStorage:', cart);
-    console.log('Cart count element found:', !!cartCountElement);
-    
     if (cartCountElement) {
         const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
         cartCountElement.textContent = totalItems;
@@ -207,11 +203,8 @@ function updateCartCount() {
         } else {
             cartCountElement.style.display = 'flex';
         }
-        
-        console.log('Cart count updated:', totalItems, 'items');
     } else {
-        console.log('Cart count element not found - trying again in 50ms');
-        // Try again after a short delay
+        // Try again after a short delay if element not found
         setTimeout(() => {
             const retryElement = document.getElementById('cartCount');
             if (retryElement) {
@@ -223,9 +216,6 @@ function updateCartCount() {
                 } else {
                     retryElement.style.display = 'flex';
                 }
-                console.log('Cart count updated on retry:', totalItems, 'items');
-            } else {
-                console.log('Cart count element still not found on retry');
             }
         }, 50);
     }

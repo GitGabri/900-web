@@ -283,7 +283,19 @@ function initNavigation() {
         navToggle.addEventListener('click', function() {
             navMenu.classList.toggle('active');
             navToggle.classList.toggle('active');
-            });
+        });
+    }
+
+    // Close mobile menu when clicking on a link
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (navMenu.classList.contains('active')) {
+                navMenu.classList.remove('active');
+                navToggle.classList.remove('active');
+            }
+        });
+    });
 }
 
 // Update cart count in navigation
@@ -301,21 +313,5 @@ function updateCartCount() {
         } else {
             cartCountElement.style.display = 'flex';
         }
-        
-        console.log('Cart count updated:', totalItems, 'items');
-    } else {
-        console.log('Cart count element not found');
     }
-}
-
-    // Close mobile menu when clicking on a link
-    const navLinks = document.querySelectorAll('.nav-menu a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (navMenu.classList.contains('active')) {
-                navMenu.classList.remove('active');
-                navToggle.classList.remove('active');
-            }
-        });
-    });
 } 
