@@ -94,7 +94,7 @@ function validateField(event) {
     
     // Phone validation
     if (field.type === 'tel' && value !== '') {
-        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        const phoneRegex = /^[\+]?[0-9][\d]{0,10}$/;
         if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
             showFieldError(field, 'Please enter a valid phone number');
             return false;
