@@ -21,6 +21,12 @@
                 <li><a href="#products">Sheet Music</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#contact">Contact</a></li>
+                <li class="cart-nav-item">
+                    <a href="cart.html" class="cart-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </a>
+                </li>
             </ul>
             <div class="nav-toggle">
                 <span></span>
@@ -93,7 +99,15 @@
                         </div>
                         <div class="product-price">
                             <span class="price">$24.99</span>
-                            <button class="buy-btn">Buy Now</button>
+                            <div class="product-actions">
+                                <div class="quantity-selector">
+                                    <button class="qty-btn minus" data-action="minus">-</button>
+                                    <input type="number" class="qty-input" value="1" min="1" max="99">
+                                    <button class="qty-btn plus" data-action="plus">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" data-product="Moonlight Sonata" data-price="24.99" data-composer="Ludwig van Beethoven">Add to Cart</button>
+                                <button class="buy-now-btn" onclick="window.location.href='cart.html'">Buy Now</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,7 +136,15 @@
                         </div>
                         <div class="product-price">
                             <span class="price">$19.99</span>
-                            <button class="buy-btn">Buy Now</button>
+                            <div class="product-actions">
+                                <div class="quantity-selector">
+                                    <button class="qty-btn minus" data-action="minus">-</button>
+                                    <input type="number" class="qty-input" value="1" min="1" max="99">
+                                    <button class="qty-btn plus" data-action="plus">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" data-product="Claire de Lune" data-price="19.99" data-composer="Claude Debussy">Add to Cart</button>
+                                <button class="buy-now-btn" onclick="window.location.href='cart.html'">Buy Now</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -152,7 +174,15 @@
                         </div>
                         <div class="product-price">
                             <span class="price">$16.99</span>
-                            <button class="buy-btn">Buy Now</button>
+                            <div class="product-actions">
+                                <div class="quantity-selector">
+                                    <button class="qty-btn minus" data-action="minus">-</button>
+                                    <input type="number" class="qty-input" value="1" min="1" max="99">
+                                    <button class="qty-btn plus" data-action="plus">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" data-product="Asturias" data-price="16.99" data-composer="Isaac Albéniz">Add to Cart</button>
+                                <button class="buy-now-btn" onclick="window.location.href='cart.html'">Buy Now</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,7 +211,15 @@
                         </div>
                         <div class="product-price">
                             <span class="price">$12.99</span>
-                            <button class="buy-btn">Buy Now</button>
+                            <div class="product-actions">
+                                <div class="quantity-selector">
+                                    <button class="qty-btn minus" data-action="minus">-</button>
+                                    <input type="number" class="qty-input" value="1" min="1" max="99">
+                                    <button class="qty-btn plus" data-action="plus">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" data-product="Romanza" data-price="12.99" data-composer="Anonymous">Add to Cart</button>
+                                <button class="buy-now-btn" onclick="window.location.href='cart.html'">Buy Now</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -211,7 +249,15 @@
                         </div>
                         <div class="product-price">
                             <span class="price">$29.99</span>
-                            <button class="buy-btn">Buy Now</button>
+                            <div class="product-actions">
+                                <div class="quantity-selector">
+                                    <button class="qty-btn minus" data-action="minus">-</button>
+                                    <input type="number" class="qty-input" value="1" min="1" max="99">
+                                    <button class="qty-btn plus" data-action="plus">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" data-product="Violin Concerto No. 1" data-price="29.99" data-composer="Max Bruch">Add to Cart</button>
+                                <button class="buy-now-btn" onclick="window.location.href='cart.html'">Buy Now</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -241,7 +287,15 @@
                         </div>
                         <div class="product-price">
                             <span class="price">$39.99</span>
-                            <button class="buy-btn">Buy Now</button>
+                            <div class="product-actions">
+                                <div class="quantity-selector">
+                                    <button class="qty-btn minus" data-action="minus">-</button>
+                                    <input type="number" class="qty-input" value="1" min="1" max="99">
+                                    <button class="qty-btn plus" data-action="plus">+</button>
+                                </div>
+                                <button class="add-to-cart-btn" data-product="String Quartet Op. 76" data-price="39.99" data-composer="Joseph Haydn">Add to Cart</button>
+                                <button class="buy-now-btn" onclick="window.location.href='cart.html'">Buy Now</button>
+                            </div>
                         </div>
                     </div>
                 </div>
