@@ -16,6 +16,9 @@ function initCheckout() {
         input.addEventListener('blur', validateField);
         input.addEventListener('input', clearFieldError);
     });
+    
+    // Update cart count on page load
+    updateCartCount();
 }
 
 function loadOrderSummary() {
@@ -280,8 +283,30 @@ function initNavigation() {
         navToggle.addEventListener('click', function() {
             navMenu.classList.toggle('active');
             navToggle.classList.toggle('active');
-        });
+            });
+}
+
+// Update cart count in navigation
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartCountElement = document.getElementById('cartCount');
+    
+    if (cartCountElement) {
+        const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+        cartCountElement.textContent = totalItems;
+        
+        // Hide count if cart is empty
+        if (totalItems === 0) {
+            cartCountElement.style.display = 'none';
+        } else {
+            cartCountElement.style.display = 'flex';
+        }
+        
+        console.log('Cart count updated:', totalItems, 'items');
+    } else {
+        console.log('Cart count element not found');
     }
+}
 
     // Close mobile menu when clicking on a link
     const navLinks = document.querySelectorAll('.nav-menu a');

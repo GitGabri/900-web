@@ -11,6 +11,9 @@ function initCart() {
     // Event listeners
     document.getElementById('clearCart').addEventListener('click', clearCart);
     document.getElementById('checkoutBtn').addEventListener('click', proceedToCheckout);
+    
+    // Update cart count on page load
+    updateCartCount();
 }
 
 function loadCart() {
@@ -34,25 +37,25 @@ function updateCartDisplay() {
         emptyCartDiv.style.display = 'block';
         cartContent.style.display = 'none';
         checkoutBtn.disabled = true;
-        updateCartCount();
-        return;
+    } else {
+        // Show cart content
+        emptyCartDiv.style.display = 'none';
+        cartContent.style.display = 'grid';
+        checkoutBtn.disabled = false;
+        
+        // Clear existing items
+        cartItemsContainer.innerHTML = '';
+        
+        // Add each cart item
+        cart.forEach((item, index) => {
+            const cartItem = createCartItemElement(item, index);
+            cartItemsContainer.appendChild(cartItem);
+        });
+        
+        updateCartSummary();
     }
     
-    // Show cart content
-    emptyCartDiv.style.display = 'none';
-    cartContent.style.display = 'grid';
-    checkoutBtn.disabled = false;
-    
-    // Clear existing items
-    cartItemsContainer.innerHTML = '';
-    
-    // Add each cart item
-    cart.forEach((item, index) => {
-        const cartItem = createCartItemElement(item, index);
-        cartItemsContainer.appendChild(cartItem);
-    });
-    
-    updateCartSummary();
+    // Always update cart count at the end
     updateCartCount();
 }
 
@@ -100,6 +103,7 @@ function updateQuantity(index, change) {
         cart[index].quantity = Math.max(1, cart[index].quantity + change);
         saveCart(cart);
         updateCartDisplay();
+        updateCartCount();
     }
 }
 
@@ -109,6 +113,7 @@ function updateQuantityDirect(index, newQuantity) {
         cart[index].quantity = newQuantity;
         saveCart(cart);
         updateCartDisplay();
+        updateCartCount();
     }
 }
 
@@ -117,12 +122,14 @@ function removeItem(index) {
     cart.splice(index, 1);
     saveCart(cart);
     updateCartDisplay();
+    updateCartCount();
 }
 
 function clearCart() {
     if (confirm('Are you sure you want to clear your cart?')) {
         localStorage.removeItem('cart');
         updateCartDisplay();
+        updateCartCount();
     }
 }
 
@@ -174,6 +181,10 @@ function updateCartCount() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const cartCountElement = document.getElementById('cartCount');
     
+    console.log('updateCartCount called');
+    console.log('Cart from localStorage:', cart);
+    console.log('Cart count element found:', !!cartCountElement);
+    
     if (cartCountElement) {
         const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
         cartCountElement.textContent = totalItems;
@@ -184,6 +195,27 @@ function updateCartCount() {
         } else {
             cartCountElement.style.display = 'flex';
         }
+        
+        console.log('Cart count updated:', totalItems, 'items');
+    } else {
+        console.log('Cart count element not found - trying again in 50ms');
+        // Try again after a short delay
+        setTimeout(() => {
+            const retryElement = document.getElementById('cartCount');
+            if (retryElement) {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                retryElement.textContent = totalItems;
+                
+                if (totalItems === 0) {
+                    retryElement.style.display = 'none';
+                } else {
+                    retryElement.style.display = 'flex';
+                }
+                console.log('Cart count updated on retry:', totalItems, 'items');
+            } else {
+                console.log('Cart count element still not found on retry');
+            }
+        }, 50);
     }
 }
 

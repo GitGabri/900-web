@@ -157,7 +157,7 @@ h3 {
 }
 
 .cart-link.active {
-    color: var(--accent-beige);
+    color: var(--text-dark);
 }
 
 .cart-link.active::after {
