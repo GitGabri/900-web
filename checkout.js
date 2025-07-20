@@ -180,22 +180,54 @@ function handleFormSubmission(event) {
         orderId: generateOrderId()
     };
     
-    // Save order data locally
+    // Save order data locally as backup
     localStorage.setItem('currentOrder', JSON.stringify(orderData));
     
-    // Send order via email (using mailto link as a simple solution)
-    sendOrderViaEmail(orderData);
-    
-    // Show success message
-    showNotification('Order submitted successfully!', 'success');
-    
-    // Clear cart
-    localStorage.removeItem('cart');
-    
-    // Redirect to confirmation page
-    setTimeout(() => {
-        window.location.href = 'confirmation.html';
-    }, 2000);
+    // Submit to database
+    submitOrderToDatabase(orderData);
+}
+
+async function submitOrderToDatabase(orderData) {
+    try {
+        // Show loading state
+        showNotification('Submitting your order...', 'info');
+        
+        // Submit to Supabase
+        await DatabaseService.submitOrder(orderData);
+        
+        // Send email notification
+        sendOrderViaEmail(orderData);
+        
+        // Show success message
+        showNotification('Order submitted successfully!', 'success');
+        
+        // Clear cart
+        localStorage.removeItem('cart');
+        
+        // Redirect to confirmation page
+        setTimeout(() => {
+            window.location.href = 'confirmation.html';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Order submission failed:', error);
+        
+        // Fallback to email-only submission
+        showNotification('Database connection failed. Sending order via email...', 'warning');
+        
+        sendOrderViaEmail(orderData);
+        
+        // Show success message
+        showNotification('Order submitted via email!', 'success');
+        
+        // Clear cart
+        localStorage.removeItem('cart');
+        
+        // Redirect to confirmation page
+        setTimeout(() => {
+            window.location.href = 'confirmation.html';
+        }, 2000);
+    }
 }
 
 function sendOrderViaEmail(orderData) {
