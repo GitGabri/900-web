@@ -1,181 +1,183 @@
-# Paolo Music - Premium Sheet Music Store
+# '900 Music - Premium Sheet Music Store
 
-A beautiful, modern single-page website for selling premium sheet music online. Built with a sophisticated black, white, and beige color scheme that conveys elegance and musical sophistication.
+A modern Next.js application for selling premium sheet music with a beautiful, responsive design and secure backend integration.
 
-## 🎵 Features
+## Features
 
-### Design & User Experience
-- **Premium Design**: Clean, modern interface with a sophisticated color palette
-- **Responsive Layout**: Fully responsive design that works on all devices
-- **Smooth Animations**: Elegant animations and transitions throughout
-- **Music-Themed Visuals**: Custom sheet music animations and musical symbols
+- **Modern React/Next.js Architecture**: Built with Next.js 14, TypeScript, and modern React patterns
+- **Responsive Design**: Beautiful, mobile-first design with smooth animations
+- **Shopping Cart**: Full cart functionality with localStorage persistence
+- **Product Filtering**: Filter sheet music by instrument type
+- **Secure Backend**: Server-side API routes for secure Supabase integration
+- **TypeScript**: Full type safety throughout the application
 
-### Product Showcase
-- **Product Grid**: Beautiful card-based layout for sheet music items
-- **Category Filtering**: Filter products by instrument type (Piano, Guitar, Violin, Ensemble)
-- **Product Details**: Each item includes composer, difficulty level, page count, and price
-- **Interactive Elements**: Hover effects and smooth transitions
+## Tech Stack
 
-### Navigation & Functionality
-- **Fixed Navigation**: Sticky header with smooth scrolling
-- **Mobile-Friendly**: Responsive navigation with hamburger menu
-- **Buy Now Buttons**: Interactive purchase buttons with notifications
-- **Smooth Scrolling**: Seamless navigation between sections
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Custom CSS with responsive design
+- **Backend**: Next.js API Routes
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth (ready for implementation)
+- **Deployment**: Vercel, Netlify, or any Next.js-compatible platform
 
-## 🎨 Color Scheme
+## Getting Started
 
-The website uses a carefully selected premium color palette:
-- **Primary Black**: `#1a1a1a` - Main text and buttons
-- **Secondary Black**: `#2d2d2d` - Hover states
-- **Primary White**: `#ffffff` - Background and cards
-- **Off White**: `#f8f8f8` - Section backgrounds
-- **Primary Beige**: `#f5f1e8` - Accent backgrounds
-- **Secondary Beige**: `#e8e0d0` - Borders and subtle elements
-- **Accent Beige**: `#d4c4a8` - Highlights and interactive elements
+### Prerequisites
 
-## 📁 Project Structure
+- Node.js 18+ 
+- npm or yarn
+- Supabase account and project
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd paolo-music-store
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create a `.env.local` file in the root directory:
+   ```env
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_KEY=your_supabase_service_key
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
 
 ```
-paolo-web/
-├── index.html          # Main HTML structure
-├── styles.css          # Complete CSS styling
-├── script.js           # JavaScript functionality
-└── README.md          # Project documentation
+paolo-music-store/
+├── app/                    # Next.js App Router
+│   ├── api/               # API Routes
+│   │   └── supabase/      # Supabase proxy API
+│   ├── cart/              # Cart page
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── Navigation.tsx     # Navigation component
+│   ├── Hero.tsx          # Hero section
+│   ├── Products.tsx      # Products grid
+│   └── Footer.tsx        # Footer component
+├── contexts/             # React contexts
+│   └── CartContext.tsx   # Shopping cart context
+├── public/               # Static assets
+└── package.json          # Dependencies and scripts
 ```
 
-## 🚀 Getting Started
+## API Routes
 
-1. **Clone or Download** the project files
-2. **Open** `index.html` in your web browser
-3. **Explore** the website and test all features
+### `/api/supabase`
+Secure proxy to Supabase database operations.
 
-### Local Development
-
-To run the project locally:
-
-```bash
-# Navigate to the project directory
-cd paolo-web
-
-# Open with a local server (optional but recommended)
-# Using Python 3:
-python -m http.server 8000
-
-# Using Node.js (if you have http-server installed):
-npx http-server
-
-# Then open http://localhost:8000 in your browser
-```
-
-## 🎯 Key Sections
-
-### Hero Section
-- Eye-catching animated sheet music visualization
-- Clear call-to-action button
-- Elegant typography with Playfair Display font
-
-### Products Section
-- **Filter Tabs**: All, Piano, Guitar, Violin, Ensemble
-- **Product Cards**: Each with preview image, details, and buy button
-- **Responsive Grid**: Automatically adjusts to screen size
-
-### About Section
-- Information about Paolo Music
-- Animated musical symbols
-- Professional presentation
-
-### Contact Section
-- Contact information with icons
-- Clean, accessible design
-
-## 🛠️ Technical Features
-
-### HTML5
-- Semantic HTML structure
-- Accessible markup
-- SEO-friendly elements
-
-### CSS3
-- CSS Grid and Flexbox layouts
-- CSS Custom Properties (variables)
-- Smooth animations and transitions
-- Mobile-first responsive design
-
-### JavaScript
-- Product filtering functionality
-- Smooth scrolling navigation
-- Interactive buy buttons with notifications
-- Intersection Observer for scroll animations
-- Performance optimizations
-
-## 📱 Responsive Design
-
-The website is fully responsive and optimized for:
-- **Desktop**: Full feature set with hover effects
-- **Tablet**: Adapted layouts and touch-friendly interactions
-- **Mobile**: Simplified navigation and optimized spacing
-
-## 🎨 Customization
-
-### Adding New Products
-To add new sheet music products, duplicate the product card structure in `index.html`:
-
-```html
-<div class="product-card" data-category="piano">
-    <div class="product-image">
-        <!-- Sheet music preview -->
-    </div>
-    <div class="product-info">
-        <h3>Piece Title</h3>
-        <p class="composer">Composer Name</p>
-        <p class="description">Description here</p>
-        <div class="product-meta">
-            <span class="difficulty">Level</span>
-            <span class="pages">X pages</span>
-        </div>
-        <div class="product-price">
-            <span class="price">$XX.XX</span>
-            <button class="buy-btn">Buy Now</button>
-        </div>
-    </div>
-</div>
-```
-
-### Modifying Colors
-Update the CSS variables in `styles.css`:
-
-```css
-:root {
-    --primary-black: #your-color;
-    --primary-beige: #your-color;
-    /* ... other colors */
+**POST Request Format:**
+```json
+{
+  "table": "table_name",
+  "action": "select|insert|update|delete",
+  "values": {}, // for insert/update
+  "filters": {} // for select/update/delete
 }
 ```
 
-## 🔧 Browser Support
+**Example Usage:**
+```javascript
+// Select all users
+const response = await fetch('/api/supabase', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    table: 'users',
+    action: 'select'
+  })
+})
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers
+// Insert new order
+const response = await fetch('/api/supabase', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    table: 'orders',
+    action: 'insert',
+    values: {
+      user_id: 1,
+      total: 99.99,
+      items: ['moonlight-sonata', 'fur-elise']
+    }
+  })
+})
+```
 
-## 📄 License
+## Deployment
 
-This project is created for educational and commercial use. Feel free to modify and adapt for your own music business.
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
 
-## 🎵 Future Enhancements
+### Netlify
+1. Build command: `npm run build`
+2. Publish directory: `.next`
+3. Add environment variables in Netlify dashboard
 
-Potential features to add:
-- Shopping cart functionality
-- Payment processing integration
-- User accounts and favorites
-- Advanced search and filtering
-- Product reviews and ratings
-- Digital download system
-- Newsletter signup
-- Social media integration
+### Other Platforms
+Any platform that supports Next.js applications can host this project.
 
----
+## Environment Variables
 
-**Created with ❤️ for musicians and music lovers everywhere** 
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `SUPABASE_URL` | Your Supabase project URL | Yes |
+| `SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
+| `SUPABASE_SERVICE_KEY` | Supabase service key (for API routes) | Yes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Public Supabase URL | Yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public Supabase anon key | Yes |
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
+
+### Adding New Features
+
+1. **New Pages**: Add to `app/` directory
+2. **New Components**: Add to `components/` directory
+3. **New API Routes**: Add to `app/api/` directory
+4. **New Contexts**: Add to `contexts/` directory
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Support
+
+For support, email info@900music.com or create an issue in the repository. 
