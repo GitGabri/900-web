@@ -1,21 +1,21 @@
-// Build script to replace Supabase credentials
+// Build script to replace API configuration
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔧 Building Supabase configuration...');
+console.log('🔧 Building API configuration...');
 
 // Read environment variables
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const LAMBDA_API_URL = process.env.LAMBDA_API_URL;
 
 // Check if environment variables are set
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+if (!LAMBDA_API_URL) {
     console.error('❌ Error: Missing environment variables');
-    console.error('Please set SUPABASE_URL and SUPABASE_ANON_KEY');
+    console.error('Please set LAMBDA_API_URL');
     console.error('');
     console.error('For local development, create a .env file:');
-    console.error('SUPABASE_URL=https://your-project-id.supabase.co');
-    console.error('SUPABASE_ANON_KEY=your-anon-key-here');
+    console.error('LAMBDA_API_URL=https://your-api-gateway-url.amazonaws.com/dev');
+    console.error('');
+    console.error('For production, set the environment variable in your deployment platform');
     process.exit(1);
 }
 
@@ -28,16 +28,14 @@ try {
     
     // Replace placeholders with actual values
     configContent = configContent
-        .replace(/YOUR_SUPABASE_URL/g, SUPABASE_URL)
-        .replace(/YOUR_SUPABASE_ANON_KEY/g, SUPABASE_ANON_KEY);
+        .replace(/YOUR_LAMBDA_API_URL/g, LAMBDA_API_URL);
     
     // Write the actual config file
     fs.writeFileSync(outputPath, configContent);
     
-    console.log('✅ Supabase configuration built successfully');
+    console.log('✅ API configuration built successfully');
     console.log(`📁 Output: ${outputPath}`);
-    console.log(`🔗 URL: ${SUPABASE_URL}`);
-    console.log(`🔑 Key: ${SUPABASE_ANON_KEY.substring(0, 10)}...`);
+    console.log(`🔗 API URL: ${LAMBDA_API_URL}`);
     
 } catch (error) {
     console.error('❌ Error building configuration:', error.message);
