@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
+import { CartProvider } from '@/contexts/CartContext'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -19,7 +20,6 @@ export const metadata: Metadata = {
   description: 'Discover beautifully crafted arrangements for piano, guitar, and more',
   keywords: 'sheet music, piano, guitar, violin, music store, arrangements',
   authors: [{ name: 'Paolo Music Store' }],
-  viewport: 'width=device-width, initial-scale=1',
 }
 
 export default function RootLayout({
@@ -33,7 +33,9 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans`}>
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   )
