@@ -4,6 +4,7 @@ import { useCart } from '@/contexts/CartContext'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function CartPage() {
   const { state, removeItem, updateQuantity, clearCart } = useCart()
@@ -24,9 +25,10 @@ export default function CartPage() {
     clearCart()
   }
 
+  const router = useRouter()
+
   const handleCheckout = () => {
-    // Navigate to checkout page
-    window.location.href = '/checkout'
+    router.push('/checkout')
   }
 
   if (items.length === 0) {
