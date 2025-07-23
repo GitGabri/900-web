@@ -310,5 +310,4 @@ const DatabaseService = {
 };
 
 // Export for use in other files
-//export { DatabaseService, supabase }; 
-window.DatabaseService = DatabaseService;
+export { DatabaseService, supabase }; 
