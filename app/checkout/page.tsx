@@ -7,6 +7,8 @@ import Footer from '@/components/Footer';
 import { DatabaseService, OrderData } from '@/lib/DatabaseService';
 import { useRouter } from 'next/navigation';
 
+export const dynamic = "force-dynamic";
+
 export default function CheckoutPage() {
   const { state, clearCart } = useCart();
   const { items, total } = state;

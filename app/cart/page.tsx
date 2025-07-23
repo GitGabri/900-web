@@ -6,6 +6,8 @@ import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+export const dynamic = "force-dynamic";
+
 export default function CartPage() {
   const { state, removeItem, updateQuantity, clearCart } = useCart()
   const { items, total } = state
