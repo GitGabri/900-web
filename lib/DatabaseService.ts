@@ -1,10 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
 // You may want to load these from environment variables in production
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Check if environment variables are available
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.warn('Supabase environment variables are not properly configured. Database operations will fail.');
+  console.warn('NEXT_PUBLIC_SUPABASE_URL:', SUPABASE_URL ? 'Set' : 'Not set');
+  console.warn('NEXT_PUBLIC_SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY ? 'Set' : 'Not set');
+}
+
+// Create Supabase client only if environment variables are available
+let supabase: any = null;
+try {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+} catch (error) {
+  console.error('Failed to create Supabase client:', error);
+}
 
 // Types
 export interface OrderItem {
@@ -41,6 +56,12 @@ export const DatabaseService = {
     if (!this.validateOrderData(orderData)) {
       throw new Error('Invalid order data');
     }
+    
+    // If Supabase is not available, throw a clear error
+    if (!supabase) {
+      throw new Error('Database connection is not available. Please check your environment configuration and try again later. If this problem persists, please contact support.');
+    }
+    
     const { data, error } = await supabase
       .from('orders')
       .insert([
@@ -85,4 +106,6 @@ export const DatabaseService = {
     const tax = subtotal * 0.08;
     return subtotal + tax;
   },
-}; 
+};
+
+ 

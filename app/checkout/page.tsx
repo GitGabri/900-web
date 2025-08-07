@@ -71,6 +71,7 @@ export default function CheckoutPage() {
         router.push('/confirmation');
       }, 1500);
     } catch (err: any) {
+      console.error('Error in handleSubmit:', err);
       setError(err.message || 'Order submission failed.');
     } finally {
       setLoading(false);
