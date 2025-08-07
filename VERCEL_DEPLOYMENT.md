@@ -1,5 +1,9 @@
 # Vercel Deployment Setup
 
+## Important: Static Files Removed
+
+The static HTML files that were conflicting with your Next.js application have been removed. Your Vercel deployment should now properly serve your Next.js app instead of the static files.
+
 ## Environment Variables
 
 To fix the "DatabaseService is not defined" error, you need to set up the following environment variables in your Vercel deployment:
@@ -35,13 +39,15 @@ To fix the "DatabaseService is not defined" error, you need to set up the follow
 
 After setting the environment variables and redeploying:
 
-1. Order submission should work properly
-2. If environment variables are missing, users will see a clear error message
-3. No false success messages will be shown
+1. Your Next.js application should be served instead of static files
+2. Order submission should work properly
+3. If environment variables are missing, users will see a clear error message
+4. No false success messages will be shown
 
 ### Troubleshooting
 
 - Make sure the environment variable names start with `NEXT_PUBLIC_` for client-side access
 - Verify your Supabase credentials are correct
 - Check the browser console for any error messages
-- If the database is unavailable, users will be informed that their order cannot be processed 
+- If the database is unavailable, users will be informed that their order cannot be processed
+- If you still see static files being served, clear your Vercel cache and redeploy 
