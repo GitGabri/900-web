@@ -45,10 +45,7 @@ A modern Next.js application for selling premium sheet music with a beautiful, r
    Create a `.env.local` file in the root directory:
    ```env
    SUPABASE_URL=your_supabase_project_url
-   SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_KEY=your_supabase_service_key
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
 4. **Run the development server**
@@ -82,6 +79,40 @@ paolo-music-store/
 ```
 
 ## API Routes
+
+### `/api/orders`
+Handles order submission to the database.
+
+**POST Request Format:**
+```json
+{
+  "orderId": "ORD-1234567890",
+  "customer": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "phone": "123-456-7890",
+    "organization": "Company Name"
+  },
+  "address": {
+    "street": "123 Main St",
+    "city": "Anytown",
+    "state": "CA",
+    "zip": "12345",
+    "country": "USA"
+  },
+  "items": [
+    {
+      "name": "Moonlight Sonata",
+      "price": 29.99,
+      "quantity": 1,
+      "composer": "Beethoven"
+    }
+  ],
+  "notes": "Optional order notes",
+  "orderDate": "2024-01-01T00:00:00.000Z"
+}
+```
 
 ### `/api/supabase`
 Secure proxy to Supabase database operations.

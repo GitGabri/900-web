@@ -4,8 +4,36 @@ import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import { DatabaseService, OrderData } from '@/lib/DatabaseService';
 import { useRouter } from 'next/navigation';
+
+// Types for order data
+interface OrderItem {
+  name: string;
+  price: number | string;
+  quantity: number;
+  composer: string;
+}
+
+interface Customer {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  organization?: string;
+}
+
+interface Address {
+  [key: string]: any;
+}
+
+interface OrderData {
+  orderId: string;
+  customer: Customer;
+  address: Address;
+  items: OrderItem[];
+  notes?: string;
+  orderDate: string;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -64,12 +92,30 @@ export default function CheckoutPage() {
         notes,
         orderDate: new Date().toISOString(),
       };
-      await DatabaseService.submitOrder(orderData);
-      setSuccess(true);
-      clearCart();
-      setTimeout(() => {
-        router.push('/confirmation');
-      }, 1500);
+      
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Order submission failed.');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setSuccess(true);
+        clearCart();
+        setTimeout(() => {
+          router.push('/confirmation');
+        }, 1500);
+      } else {
+        throw new Error('Order submission failed.');
+      }
     } catch (err: any) {
       console.error('Error in handleSubmit:', err);
       setError(err.message || 'Order submission failed.');

@@ -12,17 +12,17 @@ The following changes have been made to fix the Vercel deployment:
 
 ## Environment Variables
 
-To fix the "DatabaseService is not defined" error, you need to set up the following environment variables in your Vercel deployment:
+To fix the order submission issues, you need to set up the following environment variables in your Vercel deployment:
 
 ### Required Environment Variables
 
-1. **NEXT_PUBLIC_SUPABASE_URL**
+1. **SUPABASE_URL**
    - Your Supabase project URL
    - Format: `https://your-project-id.supabase.co`
 
-2. **NEXT_PUBLIC_SUPABASE_ANON_KEY**
-   - Your Supabase anonymous/public key
-   - Found in your Supabase project settings under API
+2. **SUPABASE_SERVICE_KEY**
+   - Your Supabase service role key (not the anon key)
+   - Found in your Supabase project settings under API → service_role key
 
 ### How to Set Environment Variables in Vercel
 
@@ -30,12 +30,12 @@ To fix the "DatabaseService is not defined" error, you need to set up the follow
 2. Select your project
 3. Go to Settings → Environment Variables
 4. Add the following variables:
-   - Name: `NEXT_PUBLIC_SUPABASE_URL`
+   - Name: `SUPABASE_URL`
    - Value: Your Supabase project URL
    - Environment: Production (and Preview if needed)
 
-   - Name: `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - Value: Your Supabase anonymous key
+   - Name: `SUPABASE_SERVICE_KEY`
+   - Value: Your Supabase service role key
    - Environment: Production (and Preview if needed)
 
 5. Click "Save"
@@ -46,14 +46,15 @@ To fix the "DatabaseService is not defined" error, you need to set up the follow
 After setting the environment variables and redeploying:
 
 1. Your Next.js application should be served instead of static files
-2. Order submission should work properly
+2. Order submission should work properly through the `/api/orders` endpoint
 3. If environment variables are missing, users will see a clear error message
-4. No false success messages will be shown
+4. Database operations are now handled server-side for better security
 
 ### Troubleshooting
 
-- Make sure the environment variable names start with `NEXT_PUBLIC_` for client-side access
+- Make sure you're using the service role key (`SUPABASE_SERVICE_KEY`) and not the anon key
 - Verify your Supabase credentials are correct
 - Check the browser console for any error messages
 - If the database is unavailable, users will be informed that their order cannot be processed
-- If you still see static files being served, clear your Vercel cache and redeploy 
+- If you still see static files being served, clear your Vercel cache and redeploy
+- The order submission now uses server-side API routes for better security and reliability 
