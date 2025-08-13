@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useCart } from '@/contexts/CartContext'
+import { useRouter, usePathname } from 'next/navigation'
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { state } = useCart()
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,6 +31,20 @@ export default function Navigation() {
 
   const cartItemCount = state.items.reduce((total, item) => total + item.quantity, 0)
 
+  const handleNavigation = (section: string) => {
+    closeMenu()
+    if (pathname === '/') {
+      // If we're on the home page, scroll to the section
+      const element = document.querySelector(`#${section}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    } else {
+      // If we're on another page, navigate to home page with hash
+      router.push(`/#${section}`)
+    }
+  }
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled 
@@ -38,28 +55,42 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-premium-black rounded-full flex items-center justify-center">
-              <span className="text-premium-white text-xl font-serif">♪</span>
-            </div>
-            <span className="text-premium-black text-xl font-serif font-semibold tracking-wide">
-              '900 Music
-            </span>
+            <Link href="/" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-premium-black rounded-full flex items-center justify-center">
+                <span className="text-premium-white text-xl font-serif">♪</span>
+              </div>
+              <span className="text-premium-black text-xl font-serif font-semibold tracking-wide">
+                '900 Music
+              </span>
+            </Link>
           </div>
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium">
+            <button 
+              onClick={() => handleNavigation('home')}
+              className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium"
+            >
               Home
-            </a>
-            <a href="#products" className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium">
+            </button>
+            <button 
+              onClick={() => handleNavigation('products')}
+              className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium"
+            >
               Sheet Music
-            </a>
-            <a href="#about" className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium">
+            </button>
+            <button 
+              onClick={() => handleNavigation('about')}
+              className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium"
+            >
               About
-            </a>
-            <a href="#contact" className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium">
+            </button>
+            <button 
+              onClick={() => handleNavigation('contact')}
+              className="text-premium-black hover:text-premium-gold transition-colors duration-200 font-medium"
+            >
               Contact
-            </a>
+            </button>
             <Link href="/cart" className="relative group">
               <div className="w-10 h-10 bg-premium-black rounded-full flex items-center justify-center hover:bg-premium-charcoal transition-colors duration-200">
                 <span className="text-premium-white text-lg">🛒</span>
@@ -93,18 +124,30 @@ export default function Navigation() {
         {isMenuOpen && (
           <div className="md:hidden bg-premium-white border-t border-premium-warm-beige">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#home" onClick={closeMenu} className="block px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200">
+              <button 
+                onClick={() => handleNavigation('home')} 
+                className="block w-full text-left px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200"
+              >
                 Home
-              </a>
-              <a href="#products" onClick={closeMenu} className="block px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200">
+              </button>
+              <button 
+                onClick={() => handleNavigation('products')} 
+                className="block w-full text-left px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200"
+              >
                 Sheet Music
-              </a>
-              <a href="#about" onClick={closeMenu} className="block px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200">
+              </button>
+              <button 
+                onClick={() => handleNavigation('about')} 
+                className="block w-full text-left px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200"
+              >
                 About
-              </a>
-              <a href="#contact" onClick={closeMenu} className="block px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200">
+              </button>
+              <button 
+                onClick={() => handleNavigation('contact')} 
+                className="block w-full text-left px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200"
+              >
                 Contact
-              </a>
+              </button>
               <Link href="/cart" onClick={closeMenu} className="block px-3 py-2 text-premium-black hover:text-premium-gold transition-colors duration-200">
                 Cart ({cartItemCount})
               </Link>
