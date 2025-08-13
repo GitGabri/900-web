@@ -12,8 +12,10 @@ export default function CartPage() {
   const { state, removeItem, updateQuantity, clearCart } = useCart()
   const { items, total } = state
 
-  const tax = total * 0.08 // 8% tax
-  const finalTotal = total + tax
+  // Ensure total is a number and calculate tax
+  const safeTotal = typeof total === 'number' ? total : 0
+  const tax = safeTotal * 0.08 // 8% tax
+  const finalTotal = safeTotal + tax
 
   const handleQuantityChange = (id: string, newQuantity: number) => {
     if (newQuantity > 0) {
@@ -87,40 +89,44 @@ export default function CartPage() {
               <div className="bg-premium-white rounded-2xl shadow-premium p-6">
                 <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Cart Items</h2>
                 <div className="space-y-4">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-4 border border-premium-warm-beige rounded-lg">
-                      <div className="flex-1">
-                        <div className="font-semibold text-premium-black text-lg">{item.name}</div>
-                        <div className="text-premium-charcoal italic">{item.composer}</div>
-                        <div className="text-premium-gold font-bold text-lg">${item.price.toFixed(2)}</div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                          <button 
-                            className="w-8 h-8 bg-premium-warm-beige text-premium-black rounded-full flex items-center justify-center hover:bg-premium-dark-beige transition-colors duration-200"
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                          >
-                            -
-                          </button>
-                          <span className="w-8 text-center font-semibold text-premium-black">{item.quantity}</span>
-                          <button 
-                            className="w-8 h-8 bg-premium-warm-beige text-premium-black rounded-full flex items-center justify-center hover:bg-premium-dark-beige transition-colors duration-200"
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                          >
-                            +
-                          </button>
+                  {items.map((item) => {
+                    // Ensure price is a number
+                    const safePrice = typeof item.price === 'number' ? item.price : 0
+                    return (
+                      <div key={item.id} className="flex items-center justify-between p-4 border border-premium-warm-beige rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-semibold text-premium-black text-lg">{item.name}</div>
+                          <div className="text-premium-charcoal italic">{item.composer}</div>
+                          <div className="text-premium-gold font-bold text-lg">${safePrice.toFixed(2)}</div>
                         </div>
                         
-                        <button 
-                          className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors duration-200"
-                          onClick={() => handleRemoveItem(item.id)}
-                        >
-                          🗑️
-                        </button>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-2">
+                            <button 
+                              className="w-8 h-8 bg-premium-warm-beige text-premium-black rounded-full flex items-center justify-center hover:bg-premium-dark-beige transition-colors duration-200"
+                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                            >
+                              -
+                            </button>
+                            <span className="w-8 text-center font-semibold text-premium-black">{item.quantity}</span>
+                            <button 
+                              className="w-8 h-8 bg-premium-warm-beige text-premium-black rounded-full flex items-center justify-center hover:bg-premium-dark-beige transition-colors duration-200"
+                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                            >
+                              +
+                            </button>
+                          </div>
+                          
+                          <button 
+                            className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors duration-200"
+                            onClick={() => handleRemoveItem(item.id)}
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -132,7 +138,7 @@ export default function CartPage() {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-premium-charcoal">
                     <span>Subtotal:</span>
-                    <span className="font-semibold">${total.toFixed(2)}</span>
+                    <span className="font-semibold">${safeTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-premium-charcoal">
                     <span>Tax (8%):</span>
@@ -150,12 +156,12 @@ export default function CartPage() {
                   >
                     Clear Cart
                   </button>
-                  <button 
-                    className="w-full bg-premium-black text-premium-white py-3 rounded-lg font-semibold hover:bg-premium-charcoal transition-colors duration-300 shadow-premium hover:shadow-premium-lg transform hover:-translate-y-1"
-                    onClick={handleCheckout}
+                  <Link 
+                    href="/checkout"
+                    className="w-full bg-premium-black text-premium-white py-3 rounded-lg font-semibold hover:bg-premium-charcoal transition-colors duration-300 shadow-premium hover:shadow-premium-lg transform hover:-translate-y-1 block text-center"
                   >
                     Proceed to Checkout
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

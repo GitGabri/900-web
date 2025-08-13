@@ -41,14 +41,14 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         return {
           ...state,
           items: updatedItems,
-          total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+          total: updatedItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0),
         }
       } else {
         const newItems = [...state.items, action.payload]
         return {
           ...state,
           items: newItems,
-          total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+          total: newItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0),
         }
       }
     }
@@ -58,7 +58,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: updatedItems,
-        total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        total: updatedItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0),
       }
     }
     
@@ -71,7 +71,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: updatedItems,
-        total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        total: updatedItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0),
       }
     }
     
@@ -86,7 +86,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: action.payload,
-        total: action.payload.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        total: action.payload.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0),
       }
     
     default:
@@ -113,9 +113,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (savedCart) {
       try {
         const cartItems = JSON.parse(savedCart)
-        dispatch({ type: 'LOAD_CART', payload: cartItems })
+        // Ensure price values are numbers
+        const validatedItems = cartItems.map((item: any) => ({
+          ...item,
+          price: Number(item.price),
+          quantity: Number(item.quantity)
+        }))
+        dispatch({ type: 'LOAD_CART', payload: validatedItems })
       } catch (error) {
         console.error('Error loading cart from localStorage:', error)
+        // Clear invalid cart data
+        localStorage.removeItem('cart')
       }
     }
   }, [])
@@ -126,7 +134,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [state.items])
 
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
-    dispatch({ type: 'ADD_ITEM', payload: { ...item, quantity: 1 } })
+    // Ensure price is a number
+    const validatedItem = {
+      ...item,
+      price: Number(item.price),
+      quantity: 1
+    }
+    dispatch({ type: 'ADD_ITEM', payload: validatedItem })
   }
 
   const removeItem = (id: string) => {

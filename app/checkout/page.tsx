@@ -40,8 +40,11 @@ export const dynamic = "force-dynamic";
 export default function CheckoutPage() {
   const { state, clearCart } = useCart();
   const { items, total } = state;
-  const tax = total * 0.08;
-  const finalTotal = total + tax;
+  
+  // Ensure total is a number and calculate tax
+  const safeTotal = typeof total === 'number' ? total : 0
+  const tax = safeTotal * 0.08;
+  const finalTotal = safeTotal + tax;
   const router = useRouter();
 
   // Form state
@@ -266,22 +269,26 @@ export default function CheckoutPage() {
             <div className="mb-8">
               <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Order Review</h2>
               <div className="bg-premium-cream rounded-lg p-6">
-                {items.map(item => (
-                  <div key={item.id} className="flex justify-between items-center py-3 border-b border-premium-warm-beige last:border-b-0">
-                    <div>
-                      <span className="font-semibold text-premium-black">{item.name}</span>
-                      <span className="text-premium-charcoal ml-2">by {item.composer}</span>
+                {items.map(item => {
+                  // Ensure price is a number
+                  const safePrice = typeof item.price === 'number' ? item.price : 0
+                  return (
+                    <div key={item.id} className="flex justify-between items-center py-3 border-b border-premium-warm-beige last:border-b-0">
+                      <div>
+                        <span className="font-semibold text-premium-black">{item.name}</span>
+                        <span className="text-premium-charcoal ml-2">by {item.composer}</span>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-premium-charcoal">Qty: {item.quantity}</span>
+                        <span className="font-bold text-premium-gold">${(safePrice * item.quantity).toFixed(2)}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-premium-charcoal">Qty: {item.quantity}</span>
-                      <span className="font-bold text-premium-gold">${(item.price * item.quantity).toFixed(2)}</span>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
                 <div className="mt-6 pt-4 border-t-2 border-premium-warm-beige space-y-2">
                   <div className="flex justify-between text-premium-charcoal">
                     <span>Subtotal:</span>
-                    <span className="font-semibold">${total.toFixed(2)}</span>
+                    <span className="font-semibold">${safeTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-premium-charcoal">
                     <span>Tax (8%):</span>
