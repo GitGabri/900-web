@@ -6,6 +6,7 @@ import Navigation from '@/components/Navigation'
 import Hero from '@/components/Hero'
 import Products from '@/components/Products'
 import Footer from '@/components/Footer'
+import ScrollIndicator from '@/components/ScrollIndicator'
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <Hero />
       <Products />
       <Footer />
+      <ScrollIndicator />
     </div>
   )
 } 

@@ -2,15 +2,7 @@
 
 export default function Hero() {
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-premium overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-20 left-10 text-8xl text-premium-black font-serif">♪</div>
-        <div className="absolute top-40 right-20 text-6xl text-premium-black font-serif">♫</div>
-        <div className="absolute bottom-32 left-1/4 text-7xl text-premium-black font-serif">♬</div>
-        <div className="absolute bottom-20 right-1/3 text-5xl text-premium-black font-serif">♩</div>
-      </div>
-      
+    <section id="home" className="relative py-20 flex items-center justify-center bg-gradient-premium overflow-hidden">
       {/* Main content */}
       <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div className="mb-8">
@@ -45,35 +37,33 @@ export default function Hero() {
         </div>
         
         {/* Feature highlights */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-premium-warm-beige rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-premium-black text-2xl">📝</span>
+        <div className="mt-24 border-t border-premium-warm-beige pt-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+            <div className="text-center group">
+              <div className="mb-6">
+                <div className="w-12 h-px bg-premium-gold mx-auto mb-4"></div>
+                <h3 className="text-2xl font-serif font-semibold text-premium-black mb-4 tracking-wide">Hand-Edited</h3>
+                <div className="w-12 h-px bg-premium-gold mx-auto"></div>
+              </div>
+              <p className="text-premium-charcoal leading-relaxed text-lg">Meticulously crafted with performance notes and detailed fingering for the perfect interpretation</p>
             </div>
-            <h3 className="text-lg font-semibold text-premium-black mb-2">Hand-Edited</h3>
-            <p className="text-premium-charcoal">Meticulously crafted with performance notes</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-premium-warm-beige rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-premium-black text-2xl">🎯</span>
+            <div className="text-center group">
+              <div className="mb-6">
+                <div className="w-12 h-px bg-premium-gold mx-auto mb-4"></div>
+                <h3 className="text-2xl font-serif font-semibold text-premium-black mb-4 tracking-wide">All Levels</h3>
+                <div className="w-12 h-px bg-premium-gold mx-auto"></div>
+              </div>
+              <p className="text-premium-charcoal leading-relaxed text-lg">From beginner to advanced arrangements, carefully graded for every skill level and experience</p>
             </div>
-            <h3 className="text-lg font-semibold text-premium-black mb-2">All Levels</h3>
-            <p className="text-premium-charcoal">From beginner to advanced arrangements</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-premium-warm-beige rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-premium-black text-2xl">⚡</span>
+            <div className="text-center group">
+              <div className="mb-6">
+                <div className="w-12 h-px bg-premium-gold mx-auto mb-4"></div>
+                <h3 className="text-2xl font-serif font-semibold text-premium-black mb-4 tracking-wide">Instant Download</h3>
+                <div className="w-12 h-px bg-premium-gold mx-auto"></div>
+              </div>
+              <p className="text-premium-charcoal leading-relaxed text-lg">Get your music immediately after purchase, ready to print and play without delay</p>
             </div>
-            <h3 className="text-lg font-semibold text-premium-black mb-2">Instant Download</h3>
-            <p className="text-premium-charcoal">Get your music immediately after purchase</p>
           </div>
-        </div>
-      </div>
-      
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-premium-black rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-premium-black rounded-full mt-2 animate-pulse"></div>
         </div>
       </div>
     </section>
