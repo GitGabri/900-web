@@ -128,10 +128,15 @@ export default function CheckoutPage() {
     return (
       <>
         <Navigation />
-        <section className="checkout-section">
-          <div className="container">
-            <h1>Checkout</h1>
-            <p>Your cart is empty.</p>
+        <section className="pt-20 pb-16 bg-premium-cream min-h-screen">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-premium-warm-beige rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="text-4xl">🛒</span>
+              </div>
+              <h1 className="text-4xl font-serif font-bold text-premium-black mb-4">Checkout</h1>
+              <p className="text-premium-charcoal text-lg">Your cart is empty.</p>
+            </div>
           </div>
         </section>
         <Footer />
@@ -142,54 +147,181 @@ export default function CheckoutPage() {
   return (
     <>
       <Navigation />
-      <section className="checkout-section">
-        <div className="container">
-          <h1>Checkout</h1>
-          <form className="checkout-form" onSubmit={handleSubmit}>
-            <h2>Customer Information</h2>
-            <div className="form-group">
-              <input name="firstName" value={customer.firstName} onChange={e => handleInputChange(e, 'customer')} placeholder="First Name" required />
-              <input name="lastName" value={customer.lastName} onChange={e => handleInputChange(e, 'customer')} placeholder="Last Name" required />
+      <section className="pt-20 pb-16 bg-premium-cream min-h-screen">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl font-serif font-bold text-premium-black mb-8 text-center">Checkout</h1>
+          
+          <form onSubmit={handleSubmit} className="bg-premium-white rounded-2xl shadow-premium p-8">
+            {/* Customer Information */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Customer Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input 
+                  name="firstName" 
+                  value={customer.firstName} 
+                  onChange={e => handleInputChange(e, 'customer')} 
+                  placeholder="First Name" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+                <input 
+                  name="lastName" 
+                  value={customer.lastName} 
+                  onChange={e => handleInputChange(e, 'customer')} 
+                  placeholder="Last Name" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input 
+                  name="email" 
+                  type="email" 
+                  value={customer.email} 
+                  onChange={e => handleInputChange(e, 'customer')} 
+                  placeholder="Email" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+                <input 
+                  name="phone" 
+                  value={customer.phone} 
+                  onChange={e => handleInputChange(e, 'customer')} 
+                  placeholder="Phone" 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+              </div>
+              <input 
+                name="organization" 
+                value={customer.organization} 
+                onChange={e => handleInputChange(e, 'customer')} 
+                placeholder="Organization (optional)" 
+                className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+              />
             </div>
-            <div className="form-group">
-              <input name="email" type="email" value={customer.email} onChange={e => handleInputChange(e, 'customer')} placeholder="Email" required />
-              <input name="phone" value={customer.phone} onChange={e => handleInputChange(e, 'customer')} placeholder="Phone" />
-            </div>
-            <div className="form-group">
-              <input name="organization" value={customer.organization} onChange={e => handleInputChange(e, 'customer')} placeholder="Organization" />
-            </div>
-            <h2>Shipping Address</h2>
-            <div className="form-group">
-              <input name="street" value={address.street} onChange={e => handleInputChange(e, 'address')} placeholder="Street Address" required />
-            </div>
-            <div className="form-group">
-              <input name="city" value={address.city} onChange={e => handleInputChange(e, 'address')} placeholder="City" required />
-              <input name="state" value={address.state} onChange={e => handleInputChange(e, 'address')} placeholder="State" required />
-              <input name="zip" value={address.zip} onChange={e => handleInputChange(e, 'address')} placeholder="ZIP Code" required />
-              <input name="country" value={address.country} onChange={e => handleInputChange(e, 'address')} placeholder="Country" required />
-            </div>
-            <h2>Order Notes</h2>
-            <div className="form-group">
-              <textarea name="notes" value={notes} onChange={handleNotesChange} placeholder="Notes (optional)" />
-            </div>
-            <h2>Order Review</h2>
-            <div className="order-review">
-              {items.map(item => (
-                <div key={item.id} className="order-item">
-                  <span>{item.name} by {item.composer}</span>
-                  <span>Qty: {item.quantity}</span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              ))}
-              <div className="order-summary">
-                <div>Subtotal: ${total.toFixed(2)}</div>
-                <div>Tax: ${tax.toFixed(2)}</div>
-                <div><strong>Total: ${finalTotal.toFixed(2)}</strong></div>
+
+            {/* Shipping Address */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Shipping Address</h2>
+              <div className="mb-4">
+                <input 
+                  name="street" 
+                  value={address.street} 
+                  onChange={e => handleInputChange(e, 'address')} 
+                  placeholder="Street Address" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <input 
+                  name="city" 
+                  value={address.city} 
+                  onChange={e => handleInputChange(e, 'address')} 
+                  placeholder="City" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+                <input 
+                  name="state" 
+                  value={address.state} 
+                  onChange={e => handleInputChange(e, 'address')} 
+                  placeholder="State" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+                <input 
+                  name="zip" 
+                  value={address.zip} 
+                  onChange={e => handleInputChange(e, 'address')} 
+                  placeholder="ZIP Code" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
+                <input 
+                  name="country" 
+                  value={address.country} 
+                  onChange={e => handleInputChange(e, 'address')} 
+                  placeholder="Country" 
+                  required 
+                  className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent"
+                />
               </div>
             </div>
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">Order submitted! Redirecting...</div>}
-            <button type="submit" className="submit-btn" disabled={loading}>{loading ? 'Submitting...' : 'Submit Order'}</button>
+
+            {/* Order Notes */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Order Notes</h2>
+              <textarea 
+                name="notes" 
+                value={notes} 
+                onChange={handleNotesChange} 
+                placeholder="Special instructions or notes (optional)" 
+                rows={4}
+                className="w-full px-4 py-3 border border-premium-warm-beige rounded-lg focus:outline-none focus:ring-2 focus:ring-premium-gold focus:border-transparent resize-none"
+              />
+            </div>
+
+            {/* Order Review */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Order Review</h2>
+              <div className="bg-premium-cream rounded-lg p-6">
+                {items.map(item => (
+                  <div key={item.id} className="flex justify-between items-center py-3 border-b border-premium-warm-beige last:border-b-0">
+                    <div>
+                      <span className="font-semibold text-premium-black">{item.name}</span>
+                      <span className="text-premium-charcoal ml-2">by {item.composer}</span>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-premium-charcoal">Qty: {item.quantity}</span>
+                      <span className="font-bold text-premium-gold">${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
+                <div className="mt-6 pt-4 border-t-2 border-premium-warm-beige space-y-2">
+                  <div className="flex justify-between text-premium-charcoal">
+                    <span>Subtotal:</span>
+                    <span className="font-semibold">${total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-premium-charcoal">
+                    <span>Tax (8%):</span>
+                    <span className="font-semibold">${tax.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-premium-black text-xl font-bold">
+                    <span>Total:</span>
+                    <span className="text-premium-gold">${finalTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-700 rounded-lg">
+                Order submitted! Redirecting...
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-premium-black text-premium-white py-4 rounded-lg font-semibold text-lg hover:bg-premium-charcoal transition-all duration-300 shadow-premium hover:shadow-premium-lg transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="loading"></div>
+                  <span>Submitting...</span>
+                </div>
+              ) : (
+                'Submit Order'
+              )}
+            </button>
           </form>
         </div>
       </section>

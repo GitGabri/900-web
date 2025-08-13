@@ -87,6 +87,19 @@ const products: Product[] = [
   }
 ]
 
+const categoryIcons = {
+  piano: '🎹',
+  guitar: '🎸',
+  violin: '🎻',
+  ensemble: '🎼'
+}
+
+const difficultyColors = {
+  'Beginner': 'bg-green-100 text-green-800',
+  'Intermediate': 'bg-yellow-100 text-yellow-800',
+  'Advanced': 'bg-red-100 text-red-800'
+}
+
 export default function Products() {
   const [activeFilter, setActiveFilter] = useState('all')
   const { addItem } = useCart()
@@ -105,81 +118,114 @@ export default function Products() {
   }
 
   return (
-    <section id="products" className="products">
-      <div className="container">
-        <div className="section-header">
-          <h2>Sheet Music Collection</h2>
-          <p>Hand-picked arrangements for musicians of all levels</p>
+    <section id="products" className="py-20 bg-premium-cream">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-serif font-bold text-premium-black mb-4">
+            Sheet Music Collection
+          </h2>
+          <p className="text-xl text-premium-charcoal max-w-2xl mx-auto">
+            Hand-picked arrangements for musicians of all levels, crafted with precision and care
+          </p>
         </div>
         
-        <div className="filter-tabs">
-          <button 
-            className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('all')}
-          >
-            All
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'piano' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('piano')}
-          >
-            Piano
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'guitar' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('guitar')}
-          >
-            Guitar
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'violin' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('violin')}
-          >
-            Violin
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'ensemble' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('ensemble')}
-          >
-            Ensemble
-          </button>
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap justify-center gap-2 mb-12">
+          {[
+            { id: 'all', label: 'All', icon: '🎵' },
+            { id: 'piano', label: 'Piano', icon: '🎹' },
+            { id: 'guitar', label: 'Guitar', icon: '🎸' },
+            { id: 'violin', label: 'Violin', icon: '🎻' },
+            { id: 'ensemble', label: 'Ensemble', icon: '🎼' }
+          ].map((filter) => (
+            <button 
+              key={filter.id}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                activeFilter === filter.id
+                  ? 'bg-premium-black text-premium-white shadow-premium'
+                  : 'bg-premium-white text-premium-black hover:bg-premium-warm-beige border border-premium-dark-beige'
+              }`}
+              onClick={() => setActiveFilter(filter.id)}
+            >
+              <span>{filter.icon}</span>
+              <span>{filter.label}</span>
+            </button>
+          ))}
         </div>
 
-        <div className="products-grid">
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="product-card" data-category={product.category}>
-              <div className="product-image">
-                <div className="sheet-preview">
-                  <div className="staff">
-                    <div className="staff-line"></div>
-                    <div className="staff-line"></div>
-                    <div className="staff-line"></div>
-                    <div className="staff-line"></div>
-                    <div className="staff-line"></div>
+            <div key={product.id} className="group">
+              <div className="bg-premium-white rounded-2xl shadow-premium hover:shadow-premium-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+                {/* Product Image */}
+                <div className="relative h-48 bg-gradient-to-br from-premium-beige to-premium-warm-beige flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-4 left-4 text-6xl text-premium-black font-serif">♪</div>
+                    <div className="absolute bottom-4 right-4 text-4xl text-premium-black font-serif">♫</div>
                   </div>
-                  <div className="clef">𝄞</div>
-                  <div className="notes">♪ ♩ ♪ ♩</div>
+                  <div className="relative z-10 text-center">
+                    <div className="text-6xl mb-2">{categoryIcons[product.category as keyof typeof categoryIcons]}</div>
+                    <div className="text-premium-black font-serif text-sm opacity-60">
+                      {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="product-info">
-                <h3>{product.name}</h3>
-                <p className="composer">{product.composer}</p>
-                <p className="description">{product.description}</p>
-                <div className="product-meta">
-                  <span className="difficulty">{product.difficulty}</span>
-                  <span className="pages">{product.pages}</span>
+                
+                {/* Product Info */}
+                <div className="p-6">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-serif font-semibold text-premium-black mb-1 group-hover:text-premium-gold transition-colors duration-300">
+                      {product.name}
+                    </h3>
+                    <p className="text-premium-charcoal italic">{product.composer}</p>
+                  </div>
+                  
+                  <p className="text-premium-charcoal text-sm mb-4 leading-relaxed">
+                    {product.description}
+                  </p>
+                  
+                  {/* Meta Info */}
+                  <div className="flex items-center justify-between mb-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyColors[product.difficulty as keyof typeof difficultyColors]}`}>
+                      {product.difficulty}
+                    </span>
+                    <span className="text-premium-charcoal text-sm font-medium">
+                      {product.pages}
+                    </span>
+                  </div>
+                  
+                  {/* Price and Button */}
+                  <div className="flex items-center justify-between">
+                    <div className="text-2xl font-serif font-bold text-premium-black">
+                      ${product.price.toFixed(2)}
+                    </div>
+                    <button 
+                      className="bg-premium-black text-premium-white px-6 py-2 rounded-lg font-medium hover:bg-premium-charcoal transition-all duration-300 transform hover:scale-105"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
-                <div className="product-price">${product.price.toFixed(2)}</div>
-                <button 
-                  className="buy-button"
-                  onClick={() => handleAddToCart(product)}
-                >
-                  Add to Cart
-                </button>
               </div>
             </div>
           ))}
         </div>
+        
+        {/* Empty State */}
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🎵</div>
+            <h3 className="text-2xl font-serif font-semibold text-premium-black mb-2">
+              No music found
+            </h3>
+            <p className="text-premium-charcoal">
+              Try selecting a different category or check back later for new arrangements.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   )
