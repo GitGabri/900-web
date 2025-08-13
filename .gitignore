@@ -15,6 +15,14 @@ dist/
 build/
 *.min.js
 *.min.css
+.next/
+
+# Static CSS files (for local development only)
+static/
+static-styles/
+legacy-styles/
+*.static.css
+*.legacy.css
 
 # Dependencies
 node_modules/
