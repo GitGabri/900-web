@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
+import { useRouter } from 'next/navigation'
 
 interface Product {
   id: string
@@ -102,7 +103,8 @@ const difficultyColors = {
 
 export default function Products() {
   const [activeFilter, setActiveFilter] = useState('all')
-  const { addItem } = useCart()
+  const { addItem, clearCart } = useCart()
+  const router = useRouter()
 
   const filteredProducts = activeFilter === 'all' 
     ? products 
@@ -115,6 +117,19 @@ export default function Products() {
       composer: product.composer,
       price: product.price
     })
+  }
+
+  const handleBuyNow = (product: Product) => {
+    // Clear cart and add only this item
+    clearCart()
+    addItem({
+      id: product.id,
+      name: product.name,
+      composer: product.composer,
+      price: product.price
+    })
+    // Navigate to checkout
+    router.push('/checkout')
   }
 
   return (
@@ -196,17 +211,25 @@ export default function Products() {
                     </span>
                   </div>
                   
-                  {/* Price and Button */}
-                  <div className="flex items-center justify-between">
-                    <div className="text-2xl font-serif font-bold text-premium-black">
+                  {/* Price and Buttons */}
+                  <div className="space-y-3">
+                    <div className="text-2xl font-serif font-bold text-premium-black text-center">
                       ${product.price.toFixed(2)}
                     </div>
-                    <button 
-                      className="bg-premium-black text-premium-white px-6 py-2 rounded-lg font-medium hover:bg-premium-charcoal transition-all duration-300 transform hover:scale-105"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      Add to Cart
-                    </button>
+                    <div className="flex flex-col space-y-2">
+                      <button 
+                        className="bg-premium-black text-premium-white px-6 py-3 rounded-lg font-medium hover:bg-premium-charcoal transition-all duration-300 transform hover:scale-105"
+                        onClick={() => handleBuyNow(product)}
+                      >
+                        Buy Now
+                      </button>
+                      <button 
+                        className="border-2 border-premium-black text-premium-black px-6 py-3 rounded-lg font-medium hover:bg-premium-black hover:text-premium-white transition-all duration-300"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
