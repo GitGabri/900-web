@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
+import PayPalButton from '@/components/PayPalButton';
 
 // Types for order data
 interface OrderItem {
@@ -33,6 +34,12 @@ interface OrderData {
   items: OrderItem[];
   notes?: string;
   orderDate: string;
+  paymentInfo?: {
+    method: string;
+    transactionId?: string;
+    amount?: string;
+    status?: string;
+  };
 }
 
 export const dynamic = "force-dynamic";
@@ -66,6 +73,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'manual'>('paypal');
+  const [paypalLoading, setPaypalLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, group: 'customer' | 'address') => {
     const { name, value } = e.target;
@@ -78,6 +87,66 @@ export default function CheckoutPage() {
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotes(e.target.value);
+  };
+
+  const handlePayPalSuccess = async (paymentResult: any) => {
+    setPaypalLoading(true);
+    setError(null);
+    try {
+      const orderId = 'ORD-' + Date.now();
+      const orderData: OrderData = {
+        orderId,
+        customer,
+        address,
+        items,
+        notes,
+        orderDate: new Date().toISOString(),
+        paymentInfo: {
+          method: 'paypal',
+          transactionId: paymentResult.payment.transactionId,
+          amount: paymentResult.payment.amount,
+          status: paymentResult.payment.status,
+        },
+      };
+      
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Order submission failed.');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setSuccess(true);
+        clearCart();
+        setTimeout(() => {
+          router.push('/confirmation');
+        }, 1500);
+      } else {
+        throw new Error('Order submission failed.');
+      }
+    } catch (err: any) {
+      console.error('Error in handlePayPalSuccess:', err);
+      setError(err.message || 'Order submission failed.');
+    } finally {
+      setPaypalLoading(false);
+    }
+  };
+
+  const handlePayPalError = (error: any) => {
+    console.error('PayPal payment error:', error);
+    setError('PayPal payment failed. Please try again.');
+  };
+
+  const handlePayPalCancel = () => {
+    setError('PayPal payment was cancelled.');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -265,6 +334,41 @@ export default function CheckoutPage() {
               />
             </div>
 
+            {/* Payment Method */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Payment Method</h2>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="paypal"
+                    name="paymentMethod"
+                    value="paypal"
+                    checked={paymentMethod === 'paypal'}
+                    onChange={() => setPaymentMethod('paypal')}
+                    className="w-4 h-4 text-premium-gold focus:ring-premium-gold"
+                  />
+                  <label htmlFor="paypal" className="text-premium-black font-medium">
+                    PayPal (Recommended)
+                  </label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="manual"
+                    name="paymentMethod"
+                    value="manual"
+                    checked={paymentMethod === 'manual'}
+                    onChange={() => setPaymentMethod('manual')}
+                    className="w-4 h-4 text-premium-gold focus:ring-premium-gold"
+                  />
+                  <label htmlFor="manual" className="text-premium-black font-medium">
+                    Manual Order (Pay Later)
+                  </label>
+                </div>
+              </div>
+            </div>
+
             {/* Order Review */}
             <div className="mb-8">
               <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Order Review</h2>
@@ -314,21 +418,40 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Submit Button */}
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-premium-black text-premium-white py-4 rounded-lg font-semibold text-lg hover:bg-premium-charcoal transition-all duration-300 shadow-premium hover:shadow-premium-lg transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="loading"></div>
-                  <span>Submitting...</span>
-                </div>
-              ) : (
-                'Submit Order'
-              )}
-            </button>
+            {/* Payment Buttons */}
+            {paymentMethod === 'paypal' ? (
+              <div className="space-y-4">
+                <PayPalButton
+                  amount={finalTotal}
+                  items={items}
+                  onSuccess={handlePayPalSuccess}
+                  onError={handlePayPalError}
+                  onCancel={handlePayPalCancel}
+                  disabled={paypalLoading}
+                />
+                {paypalLoading && (
+                  <div className="text-center py-4">
+                    <div className="loading mx-auto"></div>
+                    <p className="text-premium-charcoal mt-2">Processing PayPal payment...</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-premium-black text-premium-white py-4 rounded-lg font-semibold text-lg hover:bg-premium-charcoal transition-all duration-300 shadow-premium hover:shadow-premium-lg transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="loading"></div>
+                    <span>Submitting...</span>
+                  </div>
+                ) : (
+                  'Submit Manual Order'
+                )}
+              </button>
+            )}
           </form>
         </div>
       </section>

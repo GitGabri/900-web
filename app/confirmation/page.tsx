@@ -17,10 +17,13 @@ export default function ConfirmationPage() {
             <h1 className="text-4xl font-serif font-bold text-premium-black mb-6">Order Confirmed!</h1>
             <div className="bg-premium-white rounded-2xl shadow-premium p-8 max-w-2xl mx-auto">
               <p className="text-premium-charcoal text-lg mb-4">
-                Thank you for your order. We have received your order and will process it shortly.
+                Thank you for your order! Your payment has been processed successfully.
+              </p>
+              <p className="text-premium-charcoal text-lg mb-4">
+                We have received your order and will process it shortly.
               </p>
               <p className="text-premium-charcoal text-lg mb-8">
-                You will receive a confirmation email with your order details.
+                You will receive a confirmation email with your order details and payment receipt.
               </p>
               <Link 
                 href="/" 
