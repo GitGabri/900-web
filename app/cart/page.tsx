@@ -212,31 +212,53 @@ export default function CartPage() {
                   
                   {/* PayPal Express Checkout */}
                   <div className="mt-4">
-                    <PayPalScriptProvider options={{
-                      clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-                      currency: "USD",
-                      intent: "capture"
-                    }}>
+                                         <PayPalScriptProvider options={{
+                       clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test',
+                       currency: "USD",
+                       intent: "capture"
+                     }}>
                       <PayPalButtons
-                        createOrder={async (data, actions) => {
-                          const response = await fetch('/api/paypal/create-order', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              order_price: finalTotal,
-                              items,
-                            }),
-                          });
-                          
-                          const result = await response.json();
-                          if (result.error) {
-                            throw new Error(result.error);
-                          }
-                          
-                          return result.data.order.id;
-                        }}
+                                                 createOrder={async (data, actions) => {
+                           try {
+                             console.log('Creating PayPal order with:', { order_price: finalTotal, items });
+                             
+                             const response = await fetch('/api/paypal/create-order', {
+                               method: 'POST',
+                               headers: {
+                                 'Content-Type': 'application/json',
+                               },
+                               body: JSON.stringify({
+                                 order_price: finalTotal,
+                                 items,
+                               }),
+                             });
+                             
+                             console.log('Response status:', response.status);
+                             console.log('Response ok:', response.ok);
+                             
+                             if (!response.ok) {
+                               const errorText = await response.text();
+                               console.error('API Error Response:', errorText);
+                               throw new Error(`API Error: ${response.status} - ${errorText}`);
+                             }
+                             
+                             const result = await response.json();
+                             console.log('PayPal create order result:', result);
+                             
+                             if (!result.success) {
+                               throw new Error(result.message || 'Failed to create order');
+                             }
+                             
+                             if (!result.data || !result.data.order || !result.data.order.id) {
+                               throw new Error('Invalid order response structure');
+                             }
+                             
+                             return result.data.order.id;
+                           } catch (error) {
+                             console.error('Error in createOrder:', error);
+                             throw error;
+                           }
+                         }}
                         onApprove={handlePayPalPayment}
                         onError={(err) => {
                           console.error('PayPal error:', err);

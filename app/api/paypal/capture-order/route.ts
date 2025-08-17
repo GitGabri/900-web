@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import paypal from '@paypal/checkout-server-sdk';
 import { createClient } from '@supabase/supabase-js';
+import paypal from '@paypal/checkout-server-sdk';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -9,14 +9,14 @@ const supabase = createClient(
 
 // PayPal client configuration
 function environment() {
-  const clientId = process.env.PAYPAL_CLIENT_ID!;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
-  
-  if (process.env.NODE_ENV === 'production') {
-    return new paypal.core.LiveEnvironment(clientId, clientSecret);
-  } else {
-    return new paypal.core.SandboxEnvironment(clientId, clientSecret);
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error('PayPal credentials not found in environment variables');
   }
+
+  return new paypal.core.SandboxEnvironment(clientId, clientSecret);
 }
 
 function client() {
@@ -58,24 +58,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const paypalClient = client();
-    
-    // Create capture request
-    const captureRequest = new paypal.orders.OrdersCaptureRequest(body.orderID);
-    captureRequest.headers['prefer'] = 'return=representation';
+    console.log("Capturing order:", body.orderID);
 
-    // Execute the capture
-    const response = await paypalClient.execute(captureRequest);
-    
-    if (response.statusCode !== 201) {
-      console.log("PayPal Capture Response:", response);
-      return NextResponse.json(
-        { success: false, message: "Error occurred while capturing payment" },
-        { status: 500 }
-      );
-    }
+    try {
+      // Capture the PayPal order using the SDK
+      const request = new paypal.orders.OrdersCaptureRequest(body.orderID);
+      
+      console.log("PayPal capture request for order:", body.orderID);
 
-    const captureData = response.result;
+      const response = await client().execute(request);
+      console.log("PayPal capture response status:", response.statusCode);
+      console.log("PayPal capture response result:", response.result);
+
+      if (response.statusCode === 201) {
+        const captureData = response.result;
+        console.log("PayPal capture successful:", captureData);
 
     // If payment is successful and we have order data, save to Supabase
     if (captureData.status === 'COMPLETED' && body.orderData) {
@@ -126,13 +123,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      data: { capture: captureData }
-    });
+        return NextResponse.json({
+          success: true,
+          data: { capture: captureData }
+        });
+      } else {
+        throw new Error(`PayPal capture API returned status ${response.statusCode}`);
+      }
+
+    } catch (paypalError) {
+      console.error("PayPal capture error:", paypalError);
+      throw paypalError;
+    }
 
   } catch (error) {
     console.log("Error at Capture Order:", error);
+    console.log("Error details:", error instanceof Error ? error.message : error);
     return NextResponse.json(
       { success: false, message: "Could not capture payment" },
       { status: 500 }
