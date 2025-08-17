@@ -78,10 +78,9 @@ export default function CartPage() {
       } else {
         throw new Error(result.error || 'Payment failed');
       }
-    } catch (error: any) {
-      console.error('PayPal payment error:', error);
-      alert('Payment failed: ' + error.message);
-    }
+         } catch (error: any) {
+       alert('Payment failed: ' + error.message);
+     }
   };
 
   if (items.length === 0) {
@@ -220,8 +219,6 @@ export default function CartPage() {
                       <PayPalButtons
                                                  createOrder={async (data, actions) => {
                            try {
-                             console.log('Creating PayPal order with:', { order_price: finalTotal, items });
-                             
                              const response = await fetch('/api/paypal/create-order', {
                                method: 'POST',
                                headers: {
@@ -233,17 +230,12 @@ export default function CartPage() {
                                }),
                              });
                              
-                             console.log('Response status:', response.status);
-                             console.log('Response ok:', response.ok);
-                             
                              if (!response.ok) {
                                const errorText = await response.text();
-                               console.error('API Error Response:', errorText);
                                throw new Error(`API Error: ${response.status} - ${errorText}`);
                              }
                              
                              const result = await response.json();
-                             console.log('PayPal create order result:', result);
                              
                              if (!result.success) {
                                throw new Error(result.message || 'Failed to create order');
@@ -255,15 +247,13 @@ export default function CartPage() {
                              
                              return result.data.order.id;
                            } catch (error) {
-                             console.error('Error in createOrder:', error);
                              throw error;
                            }
                          }}
                         onApprove={handlePayPalPayment}
-                        onError={(err) => {
-                          console.error('PayPal error:', err);
-                          alert('PayPal payment failed. Please try again.');
-                        }}
+                                                 onError={(err) => {
+                           alert('PayPal payment failed. Please try again.');
+                         }}
                         style={{
                           layout: 'vertical',
                           color: 'gold',

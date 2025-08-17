@@ -35,11 +35,8 @@ function client() {
 }
 
 export async function POST(request: NextRequest) {
-  console.log("=== PayPal Create Order API Called ===");
-  
   try {
     const body: CreateOrderRequest = await request.json();
-    console.log("Request body:", body);
 
     // Validate required fields
     if (!body.order_price) {
@@ -49,8 +46,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    console.log("Received order request:", body);
 
     try {
       // Create PayPal order using the SDK
@@ -89,15 +84,10 @@ export async function POST(request: NextRequest) {
         }]
       });
 
-      console.log("PayPal request body:", request.requestBody);
-
       const response = await client().execute(request);
-      console.log("PayPal response status:", response.statusCode);
-      console.log("PayPal response result:", response.result);
 
       if (response.statusCode === 201) {
         const order = response.result;
-        console.log("Created PayPal order:", order);
         
         return NextResponse.json({
           success: true,
@@ -108,13 +98,10 @@ export async function POST(request: NextRequest) {
       }
 
     } catch (paypalError) {
-      console.error("PayPal SDK error:", paypalError);
       throw paypalError;
     }
 
   } catch (error) {
-    console.log("Error at Create Order:", error);
-    console.log("Error details:", error instanceof Error ? error.message : error);
     return NextResponse.json(
       { success: false, message: "Could not create order" },
       { status: 500 }

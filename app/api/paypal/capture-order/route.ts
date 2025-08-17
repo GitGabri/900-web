@@ -58,21 +58,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Capturing order:", body.orderID);
-
     try {
       // Capture the PayPal order using the SDK
       const request = new paypal.orders.OrdersCaptureRequest(body.orderID);
-      
-      console.log("PayPal capture request for order:", body.orderID);
 
       const response = await client().execute(request);
-      console.log("PayPal capture response status:", response.statusCode);
-      console.log("PayPal capture response result:", response.result);
 
       if (response.statusCode === 201) {
         const captureData = response.result;
-        console.log("PayPal capture successful:", captureData);
 
     // If payment is successful and we have order data, save to Supabase
     if (captureData.status === 'COMPLETED' && body.orderData) {
@@ -98,13 +91,12 @@ export async function POST(request: NextRequest) {
             },
           ]);
 
-        if (error) {
-          console.error('Supabase error:', error);
-          return NextResponse.json(
-            { success: false, message: "Payment successful but failed to save order" },
-            { status: 500 }
-          );
-        }
+                 if (error) {
+           return NextResponse.json(
+             { success: false, message: "Payment successful but failed to save order" },
+             { status: 500 }
+           );
+         }
 
         return NextResponse.json({
           success: true,
@@ -114,13 +106,12 @@ export async function POST(request: NextRequest) {
           }
         });
 
-      } catch (dbError) {
-        console.error('Database error:', dbError);
-        return NextResponse.json(
-          { success: false, message: "Payment successful but failed to save order" },
-          { status: 500 }
-        );
-      }
+             } catch (dbError) {
+         return NextResponse.json(
+           { success: false, message: "Payment successful but failed to save order" },
+           { status: 500 }
+         );
+       }
     }
 
         return NextResponse.json({
@@ -131,17 +122,14 @@ export async function POST(request: NextRequest) {
         throw new Error(`PayPal capture API returned status ${response.statusCode}`);
       }
 
-    } catch (paypalError) {
-      console.error("PayPal capture error:", paypalError);
-      throw paypalError;
-    }
+         } catch (paypalError) {
+       throw paypalError;
+     }
 
-  } catch (error) {
-    console.log("Error at Capture Order:", error);
-    console.log("Error details:", error instanceof Error ? error.message : error);
-    return NextResponse.json(
-      { success: false, message: "Could not capture payment" },
-      { status: 500 }
-    );
-  }
+   } catch (error) {
+     return NextResponse.json(
+       { success: false, message: "Could not capture payment" },
+       { status: 500 }
+     );
+   }
 }

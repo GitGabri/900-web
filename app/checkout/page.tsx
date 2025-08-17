@@ -42,8 +42,7 @@ export default function CheckoutPage() {
   const { state, clearCart } = useCart();
   const { items, total } = state;
   
-  // Debug environment variable
-  console.log('PayPal Client ID:', process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
+
   
   // Ensure total is a number and calculate tax
   const safeTotal = typeof total === 'number' ? total : 0
@@ -119,10 +118,9 @@ export default function CheckoutPage() {
       } else {
         throw new Error(result.error || 'Payment failed');
       }
-    } catch (error: any) {
-      console.error('PayPal payment error:', error);
-      setError(error.message || 'Payment failed');
-    }
+         } catch (error: any) {
+       setError(error.message || 'Payment failed');
+     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -164,10 +162,9 @@ export default function CheckoutPage() {
       } else {
         throw new Error('Order submission failed.');
       }
-    } catch (err: any) {
-      console.error('Error in handleSubmit:', err);
-      setError(err.message || 'Order submission failed.');
-    } finally {
+         } catch (err: any) {
+       setError(err.message || 'Order submission failed.');
+     } finally {
       setLoading(false);
     }
   };
@@ -400,8 +397,6 @@ export default function CheckoutPage() {
                   <PayPalButtons
                                          createOrder={async (data, actions) => {
                        try {
-                         console.log('Creating PayPal order with:', { order_price: finalTotal, items });
-                         
                          const response = await fetch('/api/paypal/create-order', {
                            method: 'POST',
                            headers: {
@@ -413,17 +408,12 @@ export default function CheckoutPage() {
                            }),
                          });
                          
-                         console.log('Response status:', response.status);
-                         console.log('Response ok:', response.ok);
-                         
                          if (!response.ok) {
                            const errorText = await response.text();
-                           console.error('API Error Response:', errorText);
                            throw new Error(`API Error: ${response.status} - ${errorText}`);
                          }
                          
                          const result = await response.json();
-                         console.log('PayPal create order result:', result);
                          
                          if (!result.success) {
                            throw new Error(result.message || 'Failed to create order');
@@ -435,15 +425,13 @@ export default function CheckoutPage() {
                          
                          return result.data.order.id;
                        } catch (error) {
-                         console.error('Error in createOrder:', error);
                          throw error;
                        }
                      }}
                     onApprove={handlePayPalApprove}
-                    onError={(err) => {
-                      console.error('PayPal error:', err);
-                      setError('PayPal payment failed. Please try again.');
-                    }}
+                                         onError={(err) => {
+                       setError('PayPal payment failed. Please try again.');
+                     }}
                     style={{
                       layout: 'vertical',
                       color: 'gold',
