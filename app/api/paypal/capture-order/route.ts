@@ -1,0 +1,141 @@
+import { NextRequest, NextResponse } from 'next/server';
+import paypal from '@paypal/checkout-server-sdk';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+);
+
+// PayPal client configuration
+function environment() {
+  const clientId = process.env.PAYPAL_CLIENT_ID!;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
+  
+  if (process.env.NODE_ENV === 'production') {
+    return new paypal.core.LiveEnvironment(clientId, clientSecret);
+  } else {
+    return new paypal.core.SandboxEnvironment(clientId, clientSecret);
+  }
+}
+
+function client() {
+  return new paypal.core.PayPalHttpClient(environment());
+}
+
+interface CaptureOrderRequest {
+  orderID: string;
+  orderData?: {
+    orderId: string;
+    customer: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone?: string;
+      organization?: string;
+    };
+    address: any;
+    items: Array<{
+      name: string;
+      price: number;
+      quantity: number;
+      composer: string;
+    }>;
+    notes?: string;
+    orderDate: string;
+    total: number;
+  };
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body: CaptureOrderRequest = await request.json();
+
+    if (!body.orderID) {
+      return NextResponse.json(
+        { success: false, message: "Please provide orderID" },
+        { status: 400 }
+      );
+    }
+
+    const paypalClient = client();
+    
+    // Create capture request
+    const captureRequest = new paypal.orders.OrdersCaptureRequest(body.orderID);
+    captureRequest.headers['prefer'] = 'return=representation';
+
+    // Execute the capture
+    const response = await paypalClient.execute(captureRequest);
+    
+    if (response.statusCode !== 201) {
+      console.log("PayPal Capture Response:", response);
+      return NextResponse.json(
+        { success: false, message: "Error occurred while capturing payment" },
+        { status: 500 }
+      );
+    }
+
+    const captureData = response.result;
+
+    // If payment is successful and we have order data, save to Supabase
+    if (captureData.status === 'COMPLETED' && body.orderData) {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .insert([
+            {
+              order_id: body.orderData.orderId,
+              customer_name: `${body.orderData.customer.firstName} ${body.orderData.customer.lastName}`,
+              customer_email: body.orderData.customer.email,
+              customer_phone: body.orderData.customer.phone,
+              customer_organization: body.orderData.customer.organization,
+              shipping_address: JSON.stringify(body.orderData.address),
+              order_items: JSON.stringify(body.orderData.items),
+              order_total: body.orderData.total,
+              notes: body.orderData.notes,
+              order_date: body.orderData.orderDate,
+              status: 'paid',
+              payment_method: 'paypal',
+              payment_id: captureData.id,
+              paypal_order_id: body.orderID,
+            },
+          ]);
+
+        if (error) {
+          console.error('Supabase error:', error);
+          return NextResponse.json(
+            { success: false, message: "Payment successful but failed to save order" },
+            { status: 500 }
+          );
+        }
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            capture: captureData,
+            order: data
+          }
+        });
+
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        return NextResponse.json(
+          { success: false, message: "Payment successful but failed to save order" },
+          { status: 500 }
+        );
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: { capture: captureData }
+    });
+
+  } catch (error) {
+    console.log("Error at Capture Order:", error);
+    return NextResponse.json(
+      { success: false, message: "Could not capture payment" },
+      { status: 500 }
+    );
+  }
+}

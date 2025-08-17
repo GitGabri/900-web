@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 // Types for order data
 interface OrderItem {
@@ -66,6 +67,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'manual'>('manual');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, group: 'customer' | 'address') => {
     const { name, value } = e.target;
@@ -78,6 +80,46 @@ export default function CheckoutPage() {
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotes(e.target.value);
+  };
+
+  const handlePayPalApprove = async (data: any, actions: any) => {
+    try {
+      const orderData = {
+        orderId: 'ORD-' + Date.now(),
+        customer,
+        address,
+        items,
+        notes,
+        orderDate: new Date().toISOString(),
+        total: finalTotal,
+      };
+
+      const response = await fetch('/api/paypal/capture-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderID: data.orderID,
+          orderData,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSuccess(true);
+        clearCart();
+        setTimeout(() => {
+          router.push('/confirmation');
+        }, 1500);
+      } else {
+        throw new Error(result.error || 'Payment failed');
+      }
+    } catch (error: any) {
+      console.error('PayPal payment error:', error);
+      setError(error.message || 'Payment failed');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -265,6 +307,35 @@ export default function CheckoutPage() {
               />
             </div>
 
+            {/* Payment Method Selection */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Payment Method</h2>
+              <div className="space-y-4">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="manual"
+                    checked={paymentMethod === 'manual'}
+                    onChange={(e) => setPaymentMethod(e.target.value as 'manual')}
+                    className="text-premium-gold focus:ring-premium-gold"
+                  />
+                  <span className="text-premium-black">Manual Order (Pay Later)</span>
+                </label>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="paypal"
+                    checked={paymentMethod === 'paypal'}
+                    onChange={(e) => setPaymentMethod(e.target.value as 'paypal')}
+                    className="text-premium-gold focus:ring-premium-gold"
+                  />
+                  <span className="text-premium-black">PayPal</span>
+                </label>
+              </div>
+            </div>
+
             {/* Order Review */}
             <div className="mb-8">
               <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Order Review</h2>
@@ -314,21 +385,66 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Submit Button */}
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-premium-black text-premium-white py-4 rounded-lg font-semibold text-lg hover:bg-premium-charcoal transition-all duration-300 shadow-premium hover:shadow-premium-lg transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="loading"></div>
-                  <span>Submitting...</span>
-                </div>
-              ) : (
-                'Submit Order'
-              )}
-            </button>
+            {/* Payment Section */}
+            {paymentMethod === 'paypal' ? (
+              <div className="mb-8">
+                <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">PayPal Payment</h2>
+                <PayPalScriptProvider options={{
+                  clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+                  currency: "USD",
+                  intent: "capture"
+                }}>
+                  <PayPalButtons
+                    createOrder={async (data, actions) => {
+                      const response = await fetch('/api/paypal/create-order', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          order_price: finalTotal,
+                          items,
+                        }),
+                      });
+                      
+                      const result = await response.json();
+                      if (result.error) {
+                        throw new Error(result.error);
+                      }
+                      
+                      return result.data.order.id;
+                    }}
+                    onApprove={handlePayPalApprove}
+                    onError={(err) => {
+                      console.error('PayPal error:', err);
+                      setError('PayPal payment failed. Please try again.');
+                    }}
+                    style={{
+                      layout: 'vertical',
+                      color: 'gold',
+                      shape: 'rect',
+                      label: 'pay'
+                    }}
+                  />
+                </PayPalScriptProvider>
+              </div>
+            ) : (
+              /* Manual Order Submit Button */
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-premium-black text-premium-white py-4 rounded-lg font-semibold text-lg hover:bg-premium-charcoal transition-all duration-300 shadow-premium hover:shadow-premium-lg transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="loading"></div>
+                    <span>Submitting...</span>
+                  </div>
+                ) : (
+                  'Submit Order'
+                )}
+              </button>
+            )}
           </form>
         </div>
       </section>
