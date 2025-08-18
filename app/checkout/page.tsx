@@ -34,6 +34,12 @@ interface OrderData {
   items: OrderItem[];
   notes?: string;
   orderDate: string;
+  paymentInfo?: {
+    method: string;
+    transactionId?: string;
+    amount?: string;
+    status?: string;
+  };
 }
 
 export const dynamic = "force-dynamic";
@@ -108,7 +114,6 @@ export default function CheckoutPage() {
       });
 
       const result = await response.json();
-
       if (result.success) {
         setSuccess(true);
         clearCart();
