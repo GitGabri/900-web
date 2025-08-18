@@ -2,7 +2,7 @@
 export const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
 
 export const paypalConfig = {
-  'client-id': PAYPAL_CLIENT_ID,
+  clientId: PAYPAL_CLIENT_ID,
   currency: 'USD',
   intent: 'capture',
 };

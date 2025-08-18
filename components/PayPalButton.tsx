@@ -71,12 +71,12 @@ export default function PayPalButton({
     }
   };
 
-  const onError = (err: any) => {
+  const handlePayPalError = (err: any) => {
     console.error('PayPal error:', err);
     onError(err);
   };
 
-  if (!paypalConfig['client-id']) {
+  if (!paypalConfig.clientId) {
     return (
       <div className="p-4 bg-yellow-100 border border-yellow-300 text-yellow-700 rounded-lg">
         PayPal is not configured. Please set your PayPal Client ID in the environment variables.
@@ -90,7 +90,7 @@ export default function PayPalButton({
         <PayPalButtons
           createOrder={createOrder}
           onApprove={onApprove}
-          onError={onError}
+          onError={handlePayPalError}
           onCancel={onCancel}
           disabled={disabled}
           style={{
