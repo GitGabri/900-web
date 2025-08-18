@@ -1,113 +1,109 @@
 import { NextRequest, NextResponse } from 'next/server';
+import paypal from '@paypal/checkout-server-sdk';
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const PAYPAL_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://api-m.paypal.com' 
-  : 'https://api-m.sandbox.paypal.com';
+// Types for the request body
+interface CreateOrderRequest {
+  order_price: number;
+  user_id?: string;
+  items?: Array<{
+    name: string;
+    price: number;
+    quantity: number;
+    composer: string;
+  }>;
+  customer?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
 
-async function getPayPalAccessToken() {
-  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64');
-  
-  const response = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'grant_type=client_credentials',
-  });
+// PayPal client configuration
+function environment() {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
-  if (!response.ok) {
-    throw new Error('Failed to get PayPal access token');
+  if (!clientId || !clientSecret) {
+    throw new Error('PayPal credentials not found in environment variables');
   }
 
-  const data = await response.json();
-  return data.access_token;
+  return new paypal.core.SandboxEnvironment(clientId, clientSecret);
+}
+
+function client() {
+  return new paypal.core.PayPalHttpClient(environment());
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, items } = await request.json();
+    const body: CreateOrderRequest = await request.json();
 
-    if (!amount || !items) {
+    // Validate required fields
+    if (!body.order_price) {
+      console.log("Missing order_price in request");
       return NextResponse.json(
-        { error: 'Amount and items are required' },
+        { success: false, message: "Please provide order_price" },
         { status: 400 }
       );
     }
 
-    const accessToken = await getPayPalAccessToken();
-
-    // Format items for PayPal
-    const paypalItems = items.map((item: any) => ({
-      name: item.name,
-      quantity: item.quantity.toString(),
-      unit_amount: {
-        currency_code: 'USD',
-        value: (typeof item.price === 'number' ? item.price : 0).toFixed(2),
-      },
-    }));
-
-    // Calculate tax (8%)
-    const subtotal = amount;
-    const tax = subtotal * 0.08;
-    const total = subtotal + tax;
-
-    const orderData = {
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
+    try {
+      // Create PayPal order using the SDK
+      const request = new paypal.orders.OrdersCreateRequest();
+      
+      // Calculate subtotal and tax
+      const subtotal = body.order_price / 1.08; // Remove tax to get subtotal
+      const tax = body.order_price - subtotal;
+      
+      request.requestBody({
+        intent: 'CAPTURE',
+        purchase_units: [{
           amount: {
             currency_code: 'USD',
-            value: total.toFixed(2),
+            value: body.order_price.toFixed(2),
             breakdown: {
               item_total: {
                 currency_code: 'USD',
-                value: subtotal.toFixed(2),
+                value: subtotal.toFixed(2)
               },
               tax_total: {
                 currency_code: 'USD',
-                value: tax.toFixed(2),
-              },
-            },
+                value: tax.toFixed(2)
+              }
+            }
           },
-          items: paypalItems,
-          description: 'Sheet Music Purchase from \'900 Music',
-        },
-      ],
-      application_context: {
-        return_url: `${request.nextUrl.origin}/confirmation`,
-        cancel_url: `${request.nextUrl.origin}/checkout`,
-        brand_name: '\'900 Music',
-        landing_page: 'BILLING',
-        user_action: 'PAY_NOW',
-        shipping_preference: 'NO_SHIPPING',
-      },
-    };
+          items: body.items?.map(item => ({
+            name: item.name,
+            unit_amount: {
+              currency_code: 'USD',
+              value: item.price.toFixed(2)
+            },
+            quantity: item.quantity.toString(),
+            description: `by ${item.composer}`
+          })) || []
+        }]
+      });
 
-    const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData),
-    });
+      const response = await client().execute(request);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('PayPal API error:', errorData);
-      throw new Error('Failed to create PayPal order');
+      if (response.statusCode === 201) {
+        const order = response.result;
+        
+        return NextResponse.json({
+          success: true,
+          data: { order }
+        });
+      } else {
+        throw new Error(`PayPal API returned status ${response.statusCode}`);
+      }
+
+    } catch (paypalError) {
+      throw paypalError;
     }
 
-    const order = await response.json();
-    
-    return NextResponse.json(order);
   } catch (error) {
-    console.error('Error creating PayPal order:', error);
     return NextResponse.json(
-      { error: 'Failed to create PayPal order' },
+      { success: false, message: "Could not create order" },
       { status: 500 }
     );
   }

@@ -5,7 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
-import PayPalButton from '@/components/PayPalButton';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 // Types for order data
 interface OrderItem {
@@ -48,6 +48,8 @@ export default function CheckoutPage() {
   const { state, clearCart } = useCart();
   const { items, total } = state;
   
+
+  
   // Ensure total is a number and calculate tax
   const safeTotal = typeof total === 'number' ? total : 0
   const tax = safeTotal * 0.08;
@@ -73,8 +75,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'manual'>('paypal');
-  const [paypalLoading, setPaypalLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'manual'>('manual');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, group: 'customer' | 'address') => {
     const { name, value } = e.target;
@@ -89,38 +90,28 @@ export default function CheckoutPage() {
     setNotes(e.target.value);
   };
 
-  const handlePayPalSuccess = async (paymentResult: any) => {
-    setPaypalLoading(true);
-    setError(null);
+  const handlePayPalApprove = async (data: any, actions: any) => {
     try {
-      const orderId = 'ORD-' + Date.now();
-      const orderData: OrderData = {
-        orderId,
+      const orderData = {
+        orderId: 'ORD-' + Date.now(),
         customer,
         address,
         items,
         notes,
         orderDate: new Date().toISOString(),
-        paymentInfo: {
-          method: 'paypal',
-          transactionId: paymentResult.payment.transactionId,
-          amount: paymentResult.payment.amount,
-          status: paymentResult.payment.status,
-        },
+        total: finalTotal,
       };
-      
-      const response = await fetch('/api/orders', {
+
+      const response = await fetch('/api/paypal/capture-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderData),
+        body: JSON.stringify({
+          orderID: data.orderID,
+          orderData,
+        }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Order submission failed.');
-      }
 
       const result = await response.json();
       if (result.success) {
@@ -130,23 +121,11 @@ export default function CheckoutPage() {
           router.push('/confirmation');
         }, 1500);
       } else {
-        throw new Error('Order submission failed.');
+        throw new Error(result.error || 'Payment failed');
       }
-    } catch (err: any) {
-      console.error('Error in handlePayPalSuccess:', err);
-      setError(err.message || 'Order submission failed.');
-    } finally {
-      setPaypalLoading(false);
-    }
-  };
-
-  const handlePayPalError = (error: any) => {
-    console.error('PayPal payment error:', error);
-    setError('PayPal payment failed. Please try again.');
-  };
-
-  const handlePayPalCancel = () => {
-    setError('PayPal payment was cancelled.');
+         } catch (error: any) {
+       setError(error.message || 'Payment failed');
+     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -188,10 +167,9 @@ export default function CheckoutPage() {
       } else {
         throw new Error('Order submission failed.');
       }
-    } catch (err: any) {
-      console.error('Error in handleSubmit:', err);
-      setError(err.message || 'Order submission failed.');
-    } finally {
+         } catch (err: any) {
+       setError(err.message || 'Order submission failed.');
+     } finally {
       setLoading(false);
     }
   };
@@ -334,38 +312,32 @@ export default function CheckoutPage() {
               />
             </div>
 
-            {/* Payment Method */}
+            {/* Payment Method Selection */}
             <div className="mb-8">
               <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">Payment Method</h2>
               <div className="space-y-4">
-                <div className="flex items-center space-x-3">
+                <label className="flex items-center space-x-3 cursor-pointer">
                   <input
                     type="radio"
-                    id="paypal"
-                    name="paymentMethod"
-                    value="paypal"
-                    checked={paymentMethod === 'paypal'}
-                    onChange={() => setPaymentMethod('paypal')}
-                    className="w-4 h-4 text-premium-gold focus:ring-premium-gold"
-                  />
-                  <label htmlFor="paypal" className="text-premium-black font-medium">
-                    PayPal (Recommended)
-                  </label>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="radio"
-                    id="manual"
                     name="paymentMethod"
                     value="manual"
                     checked={paymentMethod === 'manual'}
-                    onChange={() => setPaymentMethod('manual')}
-                    className="w-4 h-4 text-premium-gold focus:ring-premium-gold"
+                    onChange={(e) => setPaymentMethod(e.target.value as 'manual')}
+                    className="text-premium-gold focus:ring-premium-gold"
                   />
-                  <label htmlFor="manual" className="text-premium-black font-medium">
-                    Manual Order (Pay Later)
-                  </label>
-                </div>
+                  <span className="text-premium-black">Manual Order (Pay Later)</span>
+                </label>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="paypal"
+                    checked={paymentMethod === 'paypal'}
+                    onChange={(e) => setPaymentMethod(e.target.value as 'paypal')}
+                    className="text-premium-gold focus:ring-premium-gold"
+                  />
+                  <span className="text-premium-black">PayPal</span>
+                </label>
               </div>
             </div>
 
@@ -418,25 +390,64 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Payment Buttons */}
+            {/* Payment Section */}
             {paymentMethod === 'paypal' ? (
-              <div className="space-y-4">
-                <PayPalButton
-                  amount={finalTotal}
-                  items={items}
-                  onSuccess={handlePayPalSuccess}
-                  onError={handlePayPalError}
-                  onCancel={handlePayPalCancel}
-                  disabled={paypalLoading}
-                />
-                {paypalLoading && (
-                  <div className="text-center py-4">
-                    <div className="loading mx-auto"></div>
-                    <p className="text-premium-charcoal mt-2">Processing PayPal payment...</p>
-                  </div>
-                )}
+              <div className="mb-8">
+                <h2 className="text-2xl font-serif font-semibold text-premium-black mb-6">PayPal Payment</h2>
+                                 <PayPalScriptProvider options={{
+                   clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test',
+                   currency: "USD",
+                   intent: "capture"
+                 }}>
+                  <PayPalButtons
+                                         createOrder={async (data, actions) => {
+                       try {
+                         const response = await fetch('/api/paypal/create-order', {
+                           method: 'POST',
+                           headers: {
+                             'Content-Type': 'application/json',
+                           },
+                           body: JSON.stringify({
+                             order_price: finalTotal,
+                             items,
+                           }),
+                         });
+                         
+                         if (!response.ok) {
+                           const errorText = await response.text();
+                           throw new Error(`API Error: ${response.status} - ${errorText}`);
+                         }
+                         
+                         const result = await response.json();
+                         
+                         if (!result.success) {
+                           throw new Error(result.message || 'Failed to create order');
+                         }
+                         
+                         if (!result.data || !result.data.order || !result.data.order.id) {
+                           throw new Error('Invalid order response structure');
+                         }
+                         
+                         return result.data.order.id;
+                       } catch (error) {
+                         throw error;
+                       }
+                     }}
+                    onApprove={handlePayPalApprove}
+                                         onError={(err) => {
+                       setError('PayPal payment failed. Please try again.');
+                     }}
+                    style={{
+                      layout: 'vertical',
+                      color: 'gold',
+                      shape: 'rect',
+                      label: 'pay'
+                    }}
+                  />
+                </PayPalScriptProvider>
               </div>
             ) : (
+              /* Manual Order Submit Button */
               <button 
                 type="submit" 
                 disabled={loading}
@@ -448,7 +459,7 @@ export default function CheckoutPage() {
                     <span>Submitting...</span>
                   </div>
                 ) : (
-                  'Submit Manual Order'
+                  'Submit Order'
                 )}
               </button>
             )}

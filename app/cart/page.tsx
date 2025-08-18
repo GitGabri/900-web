@@ -5,6 +5,7 @@ import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,51 @@ export default function CartPage() {
   const handleCheckout = () => {
     router.push('/checkout')
   }
+
+  const handlePayPalPayment = async (data: any, actions: any) => {
+    try {
+      const orderData = {
+        orderId: 'ORD-' + Date.now(),
+        customer: {
+          firstName: 'Guest',
+          lastName: 'Customer',
+          email: 'guest@example.com',
+        },
+        address: {
+          street: 'Will be provided during checkout',
+          city: 'TBD',
+          state: 'TBD',
+          zip: 'TBD',
+          country: 'TBD',
+        },
+        items,
+        orderDate: new Date().toISOString(),
+        total: finalTotal,
+      };
+
+      const response = await fetch('/api/paypal/capture-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderID: data.orderID,
+          orderData,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        clearCart();
+        router.push('/confirmation');
+      } else {
+        throw new Error(result.error || 'Payment failed');
+      }
+         } catch (error: any) {
+       alert('Payment failed: ' + error.message);
+     }
+  };
 
   if (items.length === 0) {
     return (
@@ -162,6 +208,61 @@ export default function CartPage() {
                   >
                     Proceed to Checkout
                   </Link>
+                  
+                  {/* PayPal Express Checkout */}
+                  <div className="mt-4">
+                                         <PayPalScriptProvider options={{
+                       clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test',
+                       currency: "USD",
+                       intent: "capture"
+                     }}>
+                      <PayPalButtons
+                                                 createOrder={async (data, actions) => {
+                           try {
+                             const response = await fetch('/api/paypal/create-order', {
+                               method: 'POST',
+                               headers: {
+                                 'Content-Type': 'application/json',
+                               },
+                               body: JSON.stringify({
+                                 order_price: finalTotal,
+                                 items,
+                               }),
+                             });
+                             
+                             if (!response.ok) {
+                               const errorText = await response.text();
+                               throw new Error(`API Error: ${response.status} - ${errorText}`);
+                             }
+                             
+                             const result = await response.json();
+                             
+                             if (!result.success) {
+                               throw new Error(result.message || 'Failed to create order');
+                             }
+                             
+                             if (!result.data || !result.data.order || !result.data.order.id) {
+                               throw new Error('Invalid order response structure');
+                             }
+                             
+                             return result.data.order.id;
+                           } catch (error) {
+                             throw error;
+                           }
+                         }}
+                        onApprove={handlePayPalPayment}
+                                                 onError={(err) => {
+                           alert('PayPal payment failed. Please try again.');
+                         }}
+                        style={{
+                          layout: 'vertical',
+                          color: 'gold',
+                          shape: 'rect',
+                          label: 'pay'
+                        }}
+                      />
+                    </PayPalScriptProvider>
+                  </div>
                 </div>
               </div>
             </div>
